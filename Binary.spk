@@ -1,0 +1,1063 @@
+# Binary Interpreter for OS
+# By Rodrigo Martins, Apr 2016
+
+# Interrupts:
+# PRINT(01h)
+#    Pulls line and column from stack, and prints AX
+# INPUT(02h)
+#    Calls input from keyboard.
+# RECT(03h)
+# 
+# TEXT(04h)
+# DISPLAY_GRAPHICS(05H)
+# LINE(06h)
+
+ClearText()
+#--------------------------------------------------
+#BEGIN ASM VARIABLES
+#--------------------------------------------------
+string tmp_str = ""
+number tmp_int = 0
+number numcode = 0
+number Screen_MaxTextX = 62
+number Screen_MaxTextY = 29
+
+string maincode = ""
+
+array videomem = []
+array stack = []
+
+number AX = 0 #Accumulator
+number BX = 0 #Base register
+number CX = 0 #Count register
+number DX = 0 #Data Register
+
+number CF = 0 #Carry Flag
+number ZF = 0 #Zero Flag
+number SF = 0 #Sign Flag
+    
+number SP = 0 #Stack Pointer
+number SS = 0 #Stack Segment
+number IP = 0 #Instruction Pointer
+number CS = 0 #Code Segment
+number SI = 0 #Source Index
+number DI = 0 #Destination Index
+number DS = 0 #Data Segment
+number ES = 0 #Extended Segment
+
+bool endcode = False #Ends the Program
+#--------------------------------------------------
+#END ASM VARIABLES
+#--------------------------------------------------
+
+#--------------------------------------------------
+#ASM CODE
+#--------------------------------------------------
+void ConvertCode()
+    string rect_prog = "300001300001300001300001300001301F01300001301F01090309057B"
+    string line_prog = "300001300001300001300001300001301F01300001301F01090609057B"
+    string color_line_prog = "30FF013000013000010907300001300001300001300001300001301F01300001301F01090609057B"
+    string clock_keyb = "300A01300A010908090B300A01300C01301C090B300A01300D010909090B0905090A4E055B002A5A00007B"
+    string code
+    code = clock_keyb
+    loop x from 0 to (Count(code)/2) - 1
+        AddCode(code[2*x]+code[2*x+1])
+    end#loop
+end#void
+void LoadCode(string codefile)
+################ASM CODE############################
+ConvertCode()
+
+###################################################
+end#void
+    
+RunASM("")
+
+void RunASM(string codefile)
+    LoadCode(codefile)
+#    FillVideoMemory(" ") #Fills the backbuffer with spaces
+    loop
+    #exits program
+        if endcode == True
+            break
+        end#if
+        numcode = CharToInt(maincode[IP])
+        #Parse the code...
+########[PUSH 01-04]###################################################
+        if numcode == 00 #NOP
+            #NOTHING TO DO HERE...
+        else if numcode == 01 #PUSH AX
+                PUSH_AX()
+        else if numcode == 02 #PUSH BX
+                PUSH_BX()
+        else if numcode == 03 #PUSH CX        
+                PUSH_CX()
+        else if numcode == 04 #PUSH DX        
+                PUSH_DX()
+########[POP  05-08]###################################################
+        else if numcode == 05 #POP  AX
+                POP_AX()
+        else if numcode == 06 #POP  BX
+                POP_BX()
+        else if numcode == 07 #POP  CX
+                POP_CX()
+        else if numcode == 08 #POP  DX                                
+                POP_DX()
+########[INT  09]######################################################
+        else if numcode == 09 #INT
+             #Interruption Calls
+             IP++
+             numcode = CharToInt(maincode[IP])
+             if numcode ==01 #INT 01h
+             ASM_Print()
+        else if numcode ==02 #INT 02h
+
+        else if numcode ==03 #INT 03h RECT
+             ASM_Rect()
+        else if numcode ==04 #INT 04h TEXT
+             ASM_Text()
+        else if numcode ==05 #INT 05h DISPLAY_GRAPHICS
+             DisplayGraphics()
+        else if numcode ==06 #INT 06h LINE
+             ASM_Line()
+        else if numcode ==07 #INT 07h
+COLOR
+            ASM_Color()
+        else if numcode ==08 #INT 08h
+GET_HOUR
+            ASM_GetHour()
+        else if numcode ==09 #INT 09h
+GET_MINUTE
+            ASM_GetMinute()
+        else if numcode ==10 #INT 0Ah
+GET_KEYBOARD_STATE
+            ASM_GetKeyboardState()
+        else if numcode ==11 #INT 0Bh
+TEXT_RAW
+            ASM_Text_Raw()    
+
+
+             end#if
+########[MOV  48-77]###################################################
+        else if numcode == 48 #MOV AX, (number)
+                IP++
+                AX = CharToInt(maincode[IP])
+        else if numcode == 49 #MOV AX, [ADDRESS]
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                tmp_int = HexToInt(tmp_int)
+                AX = CharToInt(maincode[tmp_int])
+        else if numcode == 50 #MOV AX, REG                    
+                IP++
+                AX = IntToReg(CharToInt(maincode[IP]))
+        else if numcode == 51 #MOV BX, (number)
+                IP++
+                BX = CharToInt(maincode[IP])
+        else if numcode == 52 #MOV BX, [ADDRESS]
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                tmp_int = HexToInt(tmp_int)
+                BX = CharToInt(maincode[tmp_int])
+        else if numcode == 53 #MOV BX, REG                    
+                IP++
+                CX = IntToReg(CharToInt(maincode[IP]))
+        else if numcode == 54 #MOV CX, (number)
+                IP++
+                CX = CharToInt(maincode[IP])
+        else if numcode == 55 #MOV CX, [ADDRESS]
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                tmp_int = HexToInt(tmp_int)
+                CX = CharToInt(maincode[tmp_int])
+        else if numcode == 56 #MOV CX, REG                    
+                IP++
+                CX = IntToReg(CharToInt(maincode[IP]))
+        else if numcode == 57 #MOV DX, (number)
+                IP++
+                DX = CharToInt(maincode[IP])
+        else if numcode == 58 #MOV DX, [ADDRESS]
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                tmp_int = HexToInt(tmp_int)
+                DX = CharToInt(maincode[tmp_int])
+        else if numcode == 59 #MOV DX, REG                    
+                IP++
+                DX = IntToReg(CharToInt(maincode[IP]))
+        else if numcode == 60 #MOV SP, (number)
+                IP++
+                SP = CharToInt(maincode[IP])
+        else if numcode == 61 #MOV SP, [ADDRESS]
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                tmp_int = HexToInt(tmp_int)
+                SP = CharToInt(maincode[tmp_int])
+        else if numcode == 62 #MOV SP, REG                    
+                IP++
+                SP = IntToReg(CharToInt(maincode[IP]))
+        else if numcode == 63 #MOV IP, (number)
+                IP++
+                IP = CharToInt(maincode[IP])
+        else if numcode == 64 #MOV IP, [ADDRESS]
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                tmp_int = HexToInt(tmp_int)
+                IP = CharToInt(maincode[tmp_int])
+        else if numcode == 65 #MOV IP, REG                    
+                IP++
+                IP = IntToReg(CharToInt(maincode[IP]))
+        else if numcode == 66 #MOV CS, (number)
+                IP++
+                CS = CharToInt(maincode[IP])
+        else if numcode == 67 #MOV CS, [ADDRESS]
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                tmp_int = HexToInt(tmp_int)
+                CS = CharToInt(maincode[tmp_int])
+        else if numcode == 68 #MOV CS, REG                    
+                IP++
+                CS = IntToReg(CharToInt(maincode[IP]))
+        else if numcode == 69 #MOV SI, (number)
+                IP++
+                SI = CharToInt(maincode[IP])
+        else if numcode == 70 #MOV SI, [ADDRESS]
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                tmp_int = HexToInt(tmp_int)
+                SI = CharToInt(maincode[tmp_int])
+        else if numcode == 71 #MOV SI, REG                    
+                IP++
+                SI = IntToReg(CharToInt(maincode[IP]))
+        else if numcode == 72 #MOV DI, (number)
+                IP++
+                DI = CharToInt(maincode[IP])
+        else if numcode == 73 #MOV DI, [ADDRESS]
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                tmp_int = HexToInt(tmp_int)
+                DI = CharToInt(maincode[tmp_int])
+        else if numcode == 74 #MOV DI, REG                    
+                IP++
+                DI = IntToReg(CharToInt(maincode[IP]))
+        else if numcode == 75 #MOV DS, (number)
+                IP++
+                DS = CharToInt(maincode[IP])
+        else if numcode == 76 #MOV DS, [ADDRESS]
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                tmp_int = HexToInt(tmp_int)
+                DS = CharToInt(maincode[tmp_int])
+        else if numcode == 77 #MOV DS, REG                    
+                IP++
+                DS = IntToReg(CharToInt(maincode[IP]))
+########[CMP  78-89]###################################################
+        else if numcode == 78 #CMP AX, (number)
+                IP++
+                tmp_int = CharToInt(maincode[IP])
+                if AX == 0
+                    ZF = 1
+                else    
+                    ZF = 0
+                end#if
+                if AX == tmp_int
+                    CF = 1
+                else    
+                    CF = 0
+                end#if
+                if AX > tmp_int
+                    SF = 1
+                else    
+                    SF = 0
+                end#if
+        else if numcode == 79 #CMP AX, [ADDRESS]        
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                tmp_int = HexToInt(tmp_int)
+
+                tmp_int = CharToInt(maincode[IP])
+                if AX == 0
+                    ZF = 1
+                else    
+                    ZF = 0
+                end#if
+                if AX == tmp_int
+                    CF = 1
+                 else    
+                    CF = 0
+                end#if
+                if AX > tmp_int
+                    SF = 1
+                else    
+                    SF = 0
+                end#if        
+        else if numcode == 80 #CMP AX, REG       
+                IP++
+                tmp_int = IntToReg(CharToInt(maincode[IP]))
+                if AX == 0
+                     ZF = 1
+                else    
+                     ZF = 0
+                end#if
+                if AX == tmp_int
+                    CF = 1
+                else    
+                    CF = 0
+                end#if
+                if AX > tmp_int
+                    SF = 1
+                else    
+                    SF = 0
+                end#if
+        else if numcode == 81 #CMP BX, (number)
+                IP++
+                tmp_int = CharToInt(maincode[IP])
+                if BX == 0
+                    ZF = 1
+                else    
+                    ZF = 0
+                end#if
+                if BX == tmp_int
+                    CF = 1
+                else    
+                    CF = 0
+                end#if
+                if BX > tmp_int
+                    SF = 1
+                else    
+                    SF = 0
+                end#if
+        else if numcode == 82 #CMP BX, [ADDRESS]        
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                tmp_int = HexToInt(tmp_int)
+
+                tmp_int = CharToInt(maincode[IP])
+                if BX == 0
+                    ZF = 1
+                else    
+                    ZF = 0
+                end#if
+                if BX == tmp_int
+                    CF = 1
+                 else    
+                    CF = 0
+                end#if
+                if BX > tmp_int
+                    SF = 1
+                else    
+                    SF = 0
+                end#if        
+        else if numcode == 83 #CMP BX, REG       
+                IP++
+                tmp_int = IntToReg(CharToInt(maincode[IP]))
+                if BX == 0
+                     ZF = 1
+                else    
+                     ZF = 0
+                end#if
+                if BX == tmp_int
+                    CF = 1
+                else    
+                    CF = 0
+                end#if
+                if BX > tmp_int
+                    SF = 1
+                else    
+                    SF = 0
+                end#if
+        else if numcode == 84 #CMP CX, (number)
+                IP++
+                tmp_int = CharToInt(maincode[IP])
+                if CX == 0
+                    ZF = 1
+                else    
+                    ZF = 0
+                end#if
+                if CX == tmp_int
+                    CF = 1
+                else    
+                    CF = 0
+                end#if
+                if CX > tmp_int
+                    SF = 1
+                else    
+                    SF = 0
+                end#if
+        else if numcode == 85 #CMP CX, [ADDRESS]        
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                tmp_int = HexToInt(tmp_int)
+
+                tmp_int = CharToInt(maincode[IP])
+                if CX == 0
+                    ZF = 1
+                else    
+                    ZF = 0
+                end#if
+                if CX == tmp_int
+                    CF = 1
+                 else    
+                    CF = 0
+                end#if
+                if CX > tmp_int
+                    SF = 1
+                else    
+                    SF = 0
+                end#if        
+        else if numcode == 86 #CMP CX, REG       
+                IP++
+                tmp_int = IntToReg(CharToInt(maincode[IP]))
+                if CX == 0
+                     ZF = 1
+                else    
+                     ZF = 0
+                end#if
+                if CX == tmp_int
+                    CF = 1
+                else    
+                    CF = 0
+                end#if
+                if CX > tmp_int
+                    SF = 1
+                else    
+                    SF = 0
+                end#if
+        else if numcode == 87 #CMP DX, (number)
+                IP++
+                tmp_int = CharToInt(maincode[IP])
+                if DX == 0
+                    ZF = 1
+                else    
+                    ZF = 0
+                end#if
+                if DX == tmp_int
+                    CF = 1
+                else    
+                    CF = 0
+                end#if
+                if DX > tmp_int
+                    SF = 1
+                else    
+                    SF = 0
+                end#if
+        else if numcode == 88 #CMP DX, [ADDRESS]        
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                IP++
+                tmp_str += IntToHex(CharToInt(maincode[IP]))
+                tmp_int = HexToInt(tmp_int)
+
+                tmp_int = CharToInt(maincode[IP])
+                if DX == 0
+                    ZF = 1
+                else    
+                    ZF = 0
+                end#if
+                if DX == tmp_int
+                    CF = 1
+                 else    
+                    CF = 0
+                end#if
+                if DX > tmp_int
+                    SF = 1
+                else    
+                    SF = 0
+                end#if        
+        else if numcode == 89 #CMP DX, REG       
+                IP++
+                tmp_int = IntToReg(CharToInt(maincode[IP]))
+                if DX == 0
+                     ZF = 1
+                else    
+                     ZF = 0
+                end#if
+                if DX == tmp_int
+                    CF = 1
+                else    
+                    CF = 0
+                end#if
+                if DX > tmp_int
+                    SF = 1
+                else    
+                    SF = 0
+                end#if
+########[JMP  90-96]###################################################
+        else if numcode == 90 #JMP [ADDRESS]
+             tmp_str = ""
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             IP = HexToInt(tmp_str) - 1
+        else if numcode == 91 #JE [ADDRESS]
+             tmp_str = ""
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             if CF == 1 
+                 IP = HexToInt(tmp_str) - 1
+             end#if                   
+
+        else if numcode == 92 #JNE [ADDRESS]
+             tmp_str = ""
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             if CF == 0 
+                 IP = HexToInt(tmp_str) - 1
+             end#if                   
+
+
+        else if numcode == 93 #JG [ADDRESS]
+             tmp_str = ""
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             if SF == 1
+                 IP = HexToInt(tmp_str) - 1
+             end#if                   
+
+
+        else if numcode == 94 #JGE [ADDRESS]
+             tmp_str = ""
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             if SF == 1
+                 IP = HexToInt(tmp_str) - 1
+             end#if                   
+             if CF == 1 
+                 IP = HexToInt(tmp_str) - 1
+             end#if                   
+
+        else if numcode == 95 #JL [ADDRESS]
+             tmp_str = ""
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             if SF == 0
+                 IP = HexToInt(tmp_str) - 1
+             end#if                   
+        else if numcode == 96 #JLE [ADDRESS]
+             tmp_str = ""
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             if SF == 0
+                 IP = HexToInt(tmp_str) - 1
+             end#if                   
+             if CF == 1 
+                 IP = HexToInt(tmp_str) - 1
+             end#if                   
+########[MATH 97-120]##################################################
+        else if numcode == 97 #ADD (number)
+             IP++
+             CX += CharToInt(maincode[IP])
+        else if numcode == 98 #ADD [ADDRESS]
+             tmp_str = ""
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             CX += HexToInt(tmp_str)
+        else if numcode == 99 #ADD AX
+             CX += AX
+        else if numcode == 100 #ADD BX
+             CX += BX
+        else if numcode == 101 #ADD CX
+             CX += CX
+        else if numcode == 102 #ADD DX
+             CX += DX
+        else if numcode == 103 #SUB (number)
+             IP++
+             CX -= CharToInt(maincode[IP])
+        else if numcode == 104 #SUB [ADDRESS]
+             tmp_str = ""
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             CX -= HexToInt(tmp_str)
+        else if numcode == 105 #SUB AX
+             CX -= AX
+        else if numcode == 106 #SUB BX
+             CX -= BX
+        else if numcode == 107 #SUB CX
+             CX -= CX
+        else if numcode == 108 #SUB DX
+             CX -= DX
+        else if numcode == 109 #MULT (number)
+             IP++
+             CX = CX * CharToInt(maincode[IP])
+        else if numcode == 110 #MULT [ADDRESS]
+             tmp_str = ""
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             CX = CX * HexToInt(tmp_str)
+        else if numcode == 111 #MULT AX
+             CX = CX * AX
+        else if numcode == 112 #MULT BX
+             CX = CX * BX
+        else if numcode == 113 #MULT CX
+             CX = CX * CX
+        else if numcode == 114 #MULT DX
+             CX = CX * DX
+        else if numcode == 115 #DIV (number)
+             IP++
+             CX = Int(CX / CharToInt(maincode[IP]))
+             DX = Mod(CX, CharToInt(maincode[IP]))
+        else if numcode == 116 #DIV [ADDRESS]
+             tmp_str = ""
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             CX = Int(CX / HexToInt(tmp_str))
+             DX = Mod(CX, HexToInt(tmp_str))
+        else if numcode == 117 #DIV AX
+             CX = Int(CX / AX)
+             DX = Mod(CX, AX)
+        else if numcode == 118 #DIV BX
+             CX = Int(CX / AX)
+             DX = Mod(CX, AX)
+        else if numcode == 119 #DIV CX
+             CX = Int(CX / AX)
+             DX = Mod(CX, AX)             
+        else if numcode == 120 #DIV DX
+             CX = Int(CX / AX)
+             DX = Mod(CX, AX)             
+########[CALL 121-122]#################################################
+        else if numcode == 121 #CALL [ADDRESS]
+             tmp_str = ""
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             IP++
+             tmp_str = tmp_str + IntToHex(CharToInt(maincode[IP]))
+             SI = IP
+             DI = HexToInt(tmp_str) - 1
+             IP = DI
+        else if numcode == 122 #RET
+             IP = SI + 1
+        else if numcode == 123 #END
+             endcode = True
+        end#if
+      IP++ #Next instruction
+    end#loop
+end#void
+number IntToReg(number reg)
+    # 00 AX
+    # 01 BX
+    # 02 CX
+    # 03 DX
+    # 04 CF
+    # 05 ZF
+    # 06 SF
+    # 07 SP
+    # 08 SS
+    # 09 IP
+    # 10 CS
+    # 11 SI
+    # 12 DI
+    # 13 DS
+    # 14 ES
+         if reg==0
+            return AX
+    else if reg==1
+            return BX
+    else if reg==2
+            return CX
+    else if reg==3
+            return DX
+    else if reg==4
+            return CF
+    else if reg==5
+            return ZF
+    else if reg==6
+            return SF
+    else if reg==7
+            return SP
+    else if reg==8
+            return SS
+    else if reg==9
+            return IP
+    else if reg==10
+            return CS
+    else if reg==11
+            return SI
+    else if reg==12
+            return DI
+    else if reg==13
+            return DS
+    else if reg==14
+            return ES
+    end#if
+end#number
+
+void POP_AX()
+    #Removes item from top of the stack and send to AX
+    SS = Count(stack) - 1
+    AX = stack[SS]
+    stack = arrRemove(stack,SS)
+    SS--
+end#void
+void PUSH_AX()
+    #Copy value of AX to the top of the stack
+    Append(stack,AX)
+    SS++
+end#void
+
+void POP_BX()
+    #Removes item from top of the stack and send to BX
+    SS = Count(stack) - 1
+    BX = stack[SS]
+    stack = arrRemove(stack,SS)
+    SS--
+end#void
+void PUSH_BX()
+    #Copy value of BX to the top of the stack
+    Append(stack,BX)
+    SS++
+end#void
+
+void POP_CX()
+    #Removes item from top of the stack and send to CX
+    SS = Count(stack) - 1
+    CX = stack[SS]
+    stack = arrRemove(stack,SS)
+    SS--
+end#void
+void PUSH_CX()
+    #Copy value of CX to the top of the stack
+    Append(stack,CX)
+    SS++
+end#void
+
+void POP_DX()
+    #Removes item from top of the stack and send to DX
+    SS = Count(stack) - 1
+    DX = stack[SS]
+    stack = arrRemove(stack,SS)
+    SS--
+end#void
+void PUSH_DX()
+    #Copy value of DX to the top of the stack
+    Append(stack,DX)
+    SS++
+end#void
+
+void ASM_Print()
+    # Interrupt 01h - Prints Char
+    # Takes the top two values from the stack
+    # initial AX is the data
+    number line
+    number column
+    number data
+    data = AX
+    POP_AX()
+    column = AX
+    POP_AX()
+    line = AX
+    
+    videomem[line] = Subst(videomem[line], IntToChar(data), column)
+    PrintMemoryBuffer()
+end#void
+void ASM_Rect()
+    # Interrupt 03h - Draws a square
+    # Takes the top four values from the stack
+    number x0 = 0
+    number y0 = 0
+    number x1 = 0
+    number y1 = 0
+    string strhex = ""
+    POP_AX()
+    strhex = AX
+    POP_AX()
+    strhex = AX + strhex
+    y1 = HexToInt(strhex)
+    POP_AX()
+    strhex = AX
+    POP_AX()
+    strhex = AX + strhex
+    x1 = HexToInt(strhex)    
+    POP_AX()
+    strhex = AX
+    POP_AX()
+    strhex = AX + strhex
+    y0 = HexToInt(strhex)
+    POP_AX()
+    strhex = AX
+    POP_AX()
+    strhex = AX + strhex
+    x0 = HexToInt(strhex)
+
+    Rect(x0,y0,x1,y1)
+end#void
+
+void ASM_Text()
+    # Interrupt 04h - Prints Text
+    # Takes the top two values from the stack
+    # initial AX is the data
+    number line
+    number column
+    number data
+    data = AX
+    POP_AX()
+    column = AX
+    POP_AX()
+    line = AX
+    Text(column, line,IntToChar(data))
+end#void
+
+void ASM_Text_Raw()
+    # Interrupt 0Bh - Prints Raw Text(numbers)
+    # Takes the top two values from the stack
+    # initial AX is the data
+    number line
+    number column
+    number data
+    data = AX
+    POP_AX()
+    column = AX
+    POP_AX()
+    line = AX
+    Text(column, line,data)
+end#void
+void ASM_Line()
+    # Interrupt 07h - Draws a line
+    # Takes the top four values from the stack
+    number x0 = 0
+    number y0 = 0
+    number x1 = 0
+    number y1 = 0
+    string strhex = ""
+    POP_AX()
+    strhex = AX
+    POP_AX()
+    strhex = AX + strhex
+    y1 = HexToInt(strhex)
+    POP_AX()
+    strhex = AX
+    POP_AX()
+    strhex = AX + strhex
+    x1 = HexToInt(strhex)    
+    POP_AX()
+    strhex = AX
+    POP_AX()
+    strhex = AX + strhex
+    y0 = HexToInt(strhex)
+    POP_AX()
+    strhex = AX
+    POP_AX()
+    strhex = AX + strhex
+    x0 = HexToInt(strhex)
+    Line(x0,y0,x1,y1)
+end#void
+
+void ASM_Color()
+    # Interrupt 07h - Picks a color
+    # Takes the top three values from the stack
+    number r = 0
+    number g = 0
+    number b = 0
+    POP_AX()
+    b = AX/255
+    POP_AX()
+    g = AX/255
+    POP_AX()
+    r = AX/255
+    Color(r,g,b)
+end#void
+void ASM_GetHour()
+    # Interrupt 08h - Gets computer hour
+    # Puts value on AX
+    AX = GetHour()
+end#void
+    
+void ASM_GetMinute()
+    # Interrupt 09h - Gets computer Minutes
+    # Puts value on AX
+    AX = GetMinute()
+end#void
+        
+void ASM_GetKeyboardState()    
+    # Interrupt 0Ah - Reads keyboard state
+    # Returns value to AX
+    # 0 = nothing pressed, 1=left, 2=right, 3=up, 4=down
+    # 5 = space
+    AX = 0
+    if IsKeyPressed("left")
+        AX = 1
+else if IsKeyPressed("right")
+        AX = 2
+else if IsKeyPressed("up")
+        AX = 3
+else if IsKeyPressed("down")
+        AX = 4
+else if IsKeyPressed("space")                
+        AX = 5
+    end#if
+end#void
+#########################################################    
+##################Video Memory Functions#################
+#########################################################
+
+void PrintMemoryBuffer()
+        ClearText()
+    loop x from 0 to Count(videomem) - 1
+        Print(videomem[x])
+    end#loop           
+    tmp_int = 0
+    tmp_str = ""
+end#void    
+    
+Void FillVideoMemory(string fillchr)
+#Fills Video Memory    
+    Loop y from 0 to Screen_MaxTextY - 1
+        Append(videomem,"")
+        loop x from 0 to Screen_MaxTextX - 1
+            videomem[y] = videomem[y] + fillchr
+        end#loop
+
+    end#loop
+end#void
+    
+#########################################################    
+################General Purpose Functions################
+#########################################################
+
+void AddCode(string hex)
+maincode = maincode + IntToChar(HexToInt(hex))
+end#void
+    
+void DebugPoint()
+     loop
+         if IsKeyPressed("space")
+            Sleep(0.3)
+            Print("AX="+AX+",BX="+BX+",CX="+CX+",DX="+DX)
+            Print("IP="+IP+",ZF="+ZF+",CF="+CF+",SF="+SF)
+            break
+        end#if
+     end#loop
+end#void
+    
+string IntToHex(number int)
+    # Converts an integer number to a hex string
+    array num = []
+    array Letters = ["A","B","C","D","E","F"]
+    string ret = ""
+    Append(num,Int(int / 16))
+    Append(num, Mod(int, 16))
+    number x
+    loop y from 0 to Count(num) - 1
+        x = num[y]
+        if x >= 10    
+            if x > 15
+                ret = ret + IntToHex(x)
+            else    
+                ret = ret + Letters[x - 10]
+        end#if
+    else    
+        ret = ret + x
+    end#if
+    end#loop
+    Return ret
+end#string
+    
+number HexToInt(string hex)
+    # Converts a hex string to a integer number
+    array Letters = ["A","B","C","D","E","F"]
+    number hex_count = Count(hex) 
+    array hex_ints = []
+    number ret = 0
+    string tmp = 0
+    loop x from 0 to hex_count - 1
+        tmp = hex[x]
+        loop y from 0 to Count(Letters) - 1
+            if hex[x] == Letters[y]
+                tmp = 10 + y
+            end#if
+        end#loop
+        Append(hex_ints, tmp)
+    end#loop
+    number hex_count2
+    hex_count2 = hex_count - 1
+    loop x from 0 to hex_count2
+        ret = ret + Power16(hex_ints[x], hex_count2 - x)        
+    end#loop
+    Return ret
+end#number
+
+number Power16(number n, number p)
+    # Auxiliary Function for HexToInt
+    # Calculates the p power of 16 and multiplies for n
+    number ret = n
+    if p == 0
+        Return n
+    end#if
+    loop x from 1 to p 
+        ret = ret * 16
+    end#loop
+    Return ret
+end#number
+    
+#--------------------------------------------------
+#END ASM CODE
+#--------------------------------------------------
+    
+string Subst(string str, string str2, number pos)
+    #Inserts a string str2 into str on the position pos
+    string tmp = ""
+    loop x from 0 to Count(str) - 1
+        if x != pos
+            tmp = tmp + str[x]
+        else    
+            tmp = tmp + str2
+        end#if       
+    end#loop
+    Return tmp
+end#string
+    
+array arrRemove(array arrwork, number item)
+    #Safely removes item from array
+    #Returns array with removed item
+    array arrtemp = []
+    loop x from 0 to Count(arrwork) - 1
+        if x != item
+            Append(arrtemp,arrwork[x])
+        end#if
+    end#loop
+    Return arrtemp
+end#void    

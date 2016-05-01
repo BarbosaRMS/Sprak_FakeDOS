@@ -1,0 +1,467 @@
+#Variables####################
+bool editor_run = True
+bool enable_cursor_changeline = True
+bool show_sidemenu = False
+number cursor_line = 1
+number drawline_init = 0
+
+array TextFile = []
+number TextFile_Count = 0
+number Screen_MaxLines = 13
+
+number menu_selitem = 1
+number menu_xoffset = 0
+number menu_count = 7
+array menu_itemname = ["Select","Remove Line","Copy","Paste","Save","Load","Quit"]
+
+number edit_mode = 1
+ #0Readonly, 1Edit, 2Select,3RemoveLine,4AddLine
+number edit_selstart = -1
+number edit_selend = -1
+array  edit_clipboard = []
+
+##############################
+Init()
+MainLoop()
+##############################
+
+void Init()
+    LoadFile()
+    ClearText()
+    DisplayGraphics()
+end#void
+    
+void MainLoop()
+    loop 
+    #Resets Screen
+    cls() #stupid but necessary
+    Color(0,0,0)
+    Rect(0,0,Width(),Height())
+    DrawBackBuffer()
+    if editor_run == False
+        cls()        
+        DisplayGraphics()
+        DisplayGraphics()
+        ClearText()
+        break
+    end#if
+end#loop
+end#void
+
+void cls()
+    loop y from -2 to 35
+    Text(-5,y,"                                             ")
+    end#loop
+end#void
+
+void DrawBackBuffer()
+    ReadKeyboard() #Read Keyboard status
+    ProcessStates() #Process keyboard actions
+    DrawText() #Draws text
+    DrawWindow() #Draws windows
+    DrawCursor()
+    DisplayGraphics()
+end#void
+
+void ReadKeyboard()
+    if IsKeyPressed("left")
+        show_sidemenu = True
+        enable_cursor_changeline = False
+        menu_xoffset = 4
+    end#if
+    if IsKeyPressed("right")
+        show_sidemenu = False
+        enable_cursor_changeline = True
+        menu_xoffset = 0
+        if Between(cursor_line - 1,edit_selstart,edit_selend) == True
+            edit_mode = 1
+            edit_selstart = -1
+            edit_selend = -1
+        end#if
+        if edit_mode == 3
+            edit_mode = 1
+        end#if
+    end#if
+    if IsKeyPressed("down")
+        if enable_cursor_changeline == False
+            if Between(menu_selitem,1,6) == True
+                menu_selitem += 1
+                Sleep(0.1)
+            end#if
+        end#if        
+
+        if enable_cursor_changeline == True
+            if cursor_line < Screen_MaxLines
+                if cursor_line < TextFile_Count
+                    cursor_line += 1
+                end#if
+                if cursor_line == TextFile_Count
+                    if TextFile[TextFile_Count - 1] != ""
+                        Append(TextFile,"")
+                        TextFile_Count = Count(TextFile)
+                        cursor_line += 1
+                    end#if
+                end#if
+
+    else
+            if drawline_init + Screen_MaxLines < TextFile_Count        
+                drawline_init += 1
+            end#if
+            end#if
+            Sleep(0.05)
+        end#if
+    end#if
+        
+    if IsKeyPressed("up")
+        if enable_cursor_changeline == False
+            if Between(menu_selitem,2,7) == True
+                menu_selitem -= 1
+                Sleep(0.1)
+            end#if
+        end#if        
+
+                            
+        if enable_cursor_changeline == True
+            if cursor_line > 1
+                cursor_line -= 1
+                Sleep(0.05)
+    else
+            if drawline_init != 0
+                drawline_init -= 1
+                Sleep(0.05)
+            end#if
+            end#if
+    end#if
+    end#if
+    if IsKeyPressed("space")
+        if show_sidemenu == False
+            if edit_mode == 1
+                ClearText()
+                number numline = cursor_line - 1
+                loop x from 0 to numline - 1
+                    Print(" ")
+                end#loop
+                Print(TextFile[numline + drawline_init])
+                string new_input = Input("")
+                if new_input != "" 
+                    TextFile[numline + drawline_init] = new_input
+                end#if
+                Sleep(0.1)
+            end#if    
+            if edit_mode == 2
+                number numline = cursor_line - 1                                
+                if edit_selstart == -1
+                    if edit_selend == -1
+                        edit_selstart = numline
+                    else
+                        edit_selend = numline
+                        edit_mode = 1
+                    end#if
+                else
+                    if edit_selend != -1
+                        edit_selend = numline
+                        edit_mode = 1
+                    end#if
+                end#if
+                Sleep(0.1)
+            end#if
+            if edit_mode == 3
+                number numline = cursor_line - 1                
+                TextFile = arrRemove(TextFile,numline)
+                TextFile_Count = Count(TextFile)
+                Sleep(0.1)
+            end#if
+        end#if
+        if show_sidemenu == True
+            if menu_selitem == 1 #SELECT
+                edit_mode = 2
+                edit_selstart = -1
+                edit_selend = -1
+                show_sidemenu = False
+                enable_cursor_changeline = True
+                menu_xoffset = 0
+                
+            end#if
+            if menu_selitem == 2 #REMOVE LINE
+                edit_mode = 3
+                show_sidemenu = False
+                enable_cursor_changeline = True
+                menu_xoffset = 0
+                Sleep(0.1)
+            end#if
+            if menu_selitem == 3 #COPY
+                show_sidemenu = False
+                enable_cursor_changeline = True
+                menu_xoffset = 0
+                loop x from edit_selstart to edit_selend
+                    Append(edit_clipboard,TextFile[x])
+                end#loop
+                Sleep(0.1)
+            end#if
+            if menu_selitem == 4 #PASTE
+                show_sidemenu = False
+                enable_cursor_changeline = True
+                menu_xoffset = 0
+                number numline = cursor_line - 1
+                array arrTemp = []
+                loop x from 0 to numline - 1
+                    Append(arrTemp,TextFile[x])
+                end#loop
+                                    
+                loop x from 0 to Count(edit_clipboard) - 1
+                    Append(arrTemp,edit_clipboard[x])
+                end#loop
+                loop x from numline to TextFile_Count - 1
+                    Append(arrTemp,TextFile[x])
+                end#loop    
+                TextFile = arrTemp
+                TextFile_Count = Count(TextFile)
+                Sleep(0.1)
+            end#if
+
+            if menu_selitem == 5 #SAVE
+            end#if
+
+            if menu_selitem == 6 #LOAD
+            end#if
+                
+            if menu_selitem == 7 #QUIT
+                editor_run = False
+            end#if                
+
+        end#if
+   end#if
+end#void
+    
+void ProcessStates()
+end#void
+    
+void DrawWindow()
+    #Draws Menu window
+    Color(0,0.3,1)
+    Rect(0,0,Width(),10)
+    Color(1,1,1)
+    Rect(0,11,256,128)
+    Color(0,0,0)
+    Rect(1,12,255,127)
+    #Draws Menu Options
+    Color(0,0,0)
+    Text(-1,-1,"SET - File1.bas")
+    if edit_mode == 1
+        Text(20,-1,"EDIT")
+    end#if
+    if edit_mode == 2
+        Color(0,1,0)
+        Text(20,-1,"SELECT")
+        Color(0,0,0)
+    end#if
+    if edit_mode == 3
+        Color(1,0,0)
+        Text(20,-1,"REMOVE")
+        Color(0,0,0)
+    end#if
+
+    Text(28,-1,drawline_init + cursor_line)
+    #Draws Side Menu
+    if show_sidemenu == True
+        Color(1,1,1)
+        Rect(0,12,30,127)
+        number base_x = 0
+        number base_y = 0
+
+        #Draw selection box
+
+        base_x = 3
+        base_y = 15
+        Color(0,0,0)
+        Lines([base_x,base_y,base_x,base_y + 14 , base_x + 22,base_y + 13])
+        Lines([base_x,base_y,base_x + 22,base_y,base_x + 22,base_y + 13])        
+        Rect(base_x,base_y + 5,base_x + 21,base_y + 9)
+        Color(0,0,1)
+        Rect(base_x + 4,base_y + 4,base_x + 17,base_y + 10)
+        Color(0,0,0)
+
+        #Draw Remove Line box
+
+        base_x = 3
+        base_y = 30
+        Color(0,0,0)
+        Lines([base_x,base_y,base_x,base_y + 14 , base_x + 22,base_y + 13])
+        Lines([base_x,base_y,base_x + 22,base_y,base_x + 22,base_y + 13])        
+        Color(1,0,0)
+        Lines([base_x + 5, base_y + 3, base_x + 14, base_y + 12,base_x + 14, base_y + 11, base_x + 5, base_y + 2])
+        Lines([base_x + 15, base_y + 3,base_x + 5,base_y + 12, base_x + 5, base_y + 11, base_x + 15, base_y + 2])
+        Color(0,0,0)
+
+        #Draw Copy box        
+
+        base_x = 3
+        base_y = 45
+        Color(0,0,0)
+        Lines([base_x,base_y,base_x,base_y + 14 , base_x + 22,base_y + 13])
+        Lines([base_x,base_y,base_x + 22,base_y,base_x + 22,base_y + 13])        
+        Lines([base_x + 7, base_y + 2, base_x + 6, base_y + 10, base_x + 16, base_y + 10, base_x + 16, base_y + 4, base_x + 11, base_y + 4,  base_x + 12, base_y + 3,  base_x + 6, base_y + 2])
+        Line(base_x + 12, base_y + 2, base_x + 16, base_y + 4)
+        Color(0,0,0)
+
+        #Draw Paste box
+
+        base_x = 3
+        base_y = 60
+        Color(0,0,0)
+        Lines([base_x,base_y,base_x,base_y + 14 , base_x + 22,base_y + 13])
+        Lines([base_x,base_y,base_x + 22,base_y,base_x + 22,base_y + 13])        
+        Lines([base_x + 7, base_y + 3, base_x + 6, base_y + 11, base_x + 16, base_y + 11, base_x + 16, base_y + 5, base_x + 11, base_y + 5,  base_x + 12, base_y + 4,  base_x + 6, base_y + 3])
+        Line(base_x + 12, base_y + 3, base_x + 16, base_y + 5)
+        Lines([base_x + 11, base_y + 3,base_x + 11, base_y + 1, base_x + 3, base_y + 1, base_x + 3, base_y + 10, base_x + 7, base_y + 9]) 
+        Color(0,0,0)
+
+        #Draw save box        
+
+        base_x = 3
+        base_y = 75
+        Color(0,0,0)
+        Lines([base_x,base_y,base_x,base_y + 14 , base_x + 22,base_y + 13])
+        Lines([base_x,base_y,base_x + 22,base_y,base_x + 22,base_y + 13])        
+        Color(0,0,0)
+        Rect(base_x + 3,base_y + 2 ,base_x + 17 ,base_y + 12)
+        Color(0.5,0.5,0.5)
+        Rect(base_x + 6,base_y + 8 ,base_x + 14 ,base_y + 12)
+        Color(0,0,0)
+        Rect(base_x + 10,base_y + 9 ,base_x + 12 ,base_y + 11)        
+
+        #Draw load box        
+
+        base_x = 3
+        base_y = 90
+        Color(0,0,0)
+        Lines([base_x,base_y,base_x,base_y + 14 , base_x + 22,base_y + 13])
+        Lines([base_x,base_y,base_x + 22,base_y,base_x + 22,base_y + 13])        
+        Color(0,0,0)
+        Rect(base_x + 3,base_y + 2 ,base_x + 17 ,base_y + 12)
+        Color(0.5,0.5,0.5)
+        Rect(base_x + 6,base_y + 8 ,base_x + 14 ,base_y + 12)
+        Color(0,0,0)
+        Rect(base_x + 10,base_y + 9 ,base_x + 12 ,base_y + 11)        
+        #Draw exit box
+
+        base_x = 3
+        base_y = 105
+        Color(0,0,0)
+        Lines([base_x,base_y,base_x,base_y + 14 , base_x + 22,base_y + 13])
+        Lines([base_x,base_y,base_x + 22,base_y,base_x + 22,base_y + 13])        
+        Lines([base_x + 8, base_y + 9 ,base_x + 8 ,base_y + 2,base_x + 14,base_y + 2, base_x + 18, base_y + 6, base_x + 18, base_y + 13, base_x + 14, base_y + 9, base_x + 14, base_y + 3])
+        Color(1,0,0)
+        Lines([base_x + 03, base_y + 06, base_x + 8, base_y + 06,base_x + 8, base_y + 04,    base_x + 11, base_y + 07, base_x + 8, base_y + 10, base_x + 8, base_y + 7,  base_x + 3, base_y + 7])
+        Color(0,0,0)
+        
+        #Draw selected item
+        Color(1,1,1)
+        number sel_y = 15 * menu_selitem
+        sel_y += 2
+        Rect(35, sel_y,150, sel_y + 15)
+        Color(0,0,0)
+        Text(4,-1 + 2 * menu_selitem, menu_itemname[menu_selitem - 1])
+    end#if
+end#void
+    
+void DrawText()
+    number y_init = 1
+    number loopline = 0
+    Color(1,1,1)
+    number drawline_end
+    number drawrange 
+    if TextFile_Count > Screen_MaxLines - 1
+        drawrange = drawline_init + Screen_MaxLines
+        if drawrange > TextFile_Count - 1
+            drawline_end = TextFile_Count - 1
+        else    
+            drawline_end = drawrange
+        end#if
+
+    else    
+        drawline_end = TextFile_Count - 1
+    end#if
+        
+    loop y from drawline_init to drawline_end
+        if Between(y,edit_selstart,edit_selend) == True
+            Color(0,1,0)
+        else    
+            Color(1,1,1)
+        end#if
+        Text(menu_xoffset,y_init + loopline,TextFile[y])
+        loopline += 1   
+    end#loop
+    
+end#void
+
+void DrawCursor()
+    number y_init = 10
+    number y_linepixelratio = 8
+    number cursor_linepixel
+    if enable_cursor_changeline == True
+        Color(1,1,1)
+        cursor_linepixel = y_init
+        cursor_linepixel += cursor_line * y_linepixelratio    
+        Rect(0,cursor_linepixel,5,cursor_linepixel + 8)
+        if edit_mode == 2
+            if edit_selstart != -1
+                edit_selend = cursor_line - 1
+            end#if
+        end#if
+    end#if
+end#void
+    
+void cls_area(x1,x2,y1,y2)
+    string spaces = ""
+    loop x from x1 to x2
+        spaces = spaces + " "
+    end#loop
+    loop y from y1 to y2
+        Text(-1,y,spaces)
+    end#loop
+
+end#void
+
+bool Between(number num, number x, number y)
+    bool result = False
+    if num >= x
+        if num <= y
+            result = True
+        end#if
+    end#if
+    Return result
+end#bool
+
+void LoadFile()
+    Append(TextFile,"dim x as integer")
+    Append(TextFile,"x = x + 1")
+    Append(TextFile,"if x = 10 then")
+    Append(TextFile,"print x")
+#    Append(TextFile,"end if")
+#    Append(TextFile,"end if")
+#    Append(TextFile,"end if")
+#    Append(TextFile,"end if")
+#    Append(TextFile,"end if")
+#    Append(TextFile,"end if")
+#    Append(TextFile,"end if")                                            
+#    Append(TextFile,"end if")
+#    Append(TextFile,"end if")
+#    Append(TextFile,"end if")
+#    Append(TextFile,"end if")
+#    Append(TextFile,"end if")
+#    Append(TextFile,"Im getting really tired of this...")
+#    Append(TextFile,"...")        
+#    Append(TextFile,"ok you won.")    
+    TextFile_Count = Count(TextFile)                                
+
+end#void
+array arrRemove(array arrwork, number item)
+    array arrtemp = []
+    loop x from 0 to Count(arrwork) - 1
+        if x != item
+            Append(arrtemp,arrwork[x])
+        end#if
+    end#loop
+    Return arrtemp
+end#void

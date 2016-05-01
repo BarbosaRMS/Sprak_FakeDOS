@@ -1,0 +1,2003 @@
+============================================================================
+=FakeASM Documentation v0.02                                               =
+=Written by Rodrigo M.S. Barbosa, 2016                                     =
+=                                                                          =
+=Feel free to modify and use this however you want.                        =
+=This is a description manual for FakeASM, a binary interpreter for SPRAK  =
+=It was based on the 8086 instruction set, but simplified.                 =
+============================================================================
+
+Notation for reading this document:
+	{ADDRESS} is always a 2 bytes code.
+		For example, the code 18ABCD means POP [ABCDh] = POP [43981]
+	[ADDRESS] is a memory address, a 2 bytes code.
+	(Number) means a pure number.
+		For example, the code 380003 means CJMP (03) #jumps 3 lines of code
+
+Registers:
+AX Accumulator
+BX Base register
+CX Count register
+DX Data Register
+
+Flags:
+CF Carry Flag
+ZF Zero Flag
+SF Sign Flag
+OF Overflow Flag
+PF Parity Flag
+AF Auxiliary Flag
+IF Interrupt Flag
+DF Direction Flag (0=forward, 1=backward)
+
+Pointers:
+SP Stack Pointer
+SS Stack Segment
+IP Instruction Pointer
+CS Code Segment
+SI Source Index
+DI Destination Index
+DS Data Segment
+ES Extended Segment
+
+Instruction Set:
+1)  PUSH (00h-17h)
+	Description: Stores value in the top of the stack.
+	##  Command
+	00h PUSH {ADDRESS}
+	01h PUSH AX
+	02h PUSH BX
+	03h PUSH CX
+	04h PUSH DX
+	05h PUSH AH
+	06h PUSH AL
+	07h PUSH BH
+	08h PUSH BL
+	09h PUSH CH
+	0Ah PUSH CL
+	0Bh PUSH DH
+	0Ch PUSH DL
+	0Dh PUSH CF
+	0Eh PUSH ZF
+	0Fh PUSH SF
+	10h PUSH SP
+	11h PUSH SS
+	12h PUSH IP
+	13h PUSH CS
+	14h PUSH SI
+	15h PUSH DI
+	16h PUSH DS
+	17h PUSH ES
+2)  POP (18h-2Fh)
+	Description: Take away the value on the top of the stack, sending to indicated register.
+	##  Command
+	18h POP {ADDRESS}
+	19h POP AX
+	1Ah POP BX
+	1Bh POP CX
+	1Ch POP DX
+	1Dh POP AH
+	1Eh POP AL
+	1Fh POP BH
+	20h POP BL
+	21h POP CH
+	22h POP CL
+	23h POP DH
+	24h POP DL
+	25h POP CF
+	26h POP ZF
+	27h POP SF
+	28h POP SP
+	29h POP SS
+	2Ah POP IP
+	2Bh POP CS
+	2Ch POP SI
+	2Dh POP DI
+	2Eh POP DS
+	2Fh POP ES
+3)  MOV (30h-32h)
+	Description: Moves values to registers. MOV AX,BX means to move the data in BX to register AX.
+				 Needs two bytes. 30h is page one, 31h is page two, 32h is page three.
+				 Example:     31 A0 11 0A = MOV IP, [110Ah]
+	30h MOV FIRST PAGE
+	MOV {ADDRESS}
+		##  Command		
+		00h MOV {ADDRESS},{ADDRESS}
+		01h MOV {ADDRESS}, AX
+		02h MOV {ADDRESS}, BX
+		03h MOV {ADDRESS}, CX
+		04h MOV {ADDRESS}, DX
+		05h MOV {ADDRESS}, AH
+		06h MOV {ADDRESS}, AL
+		07h MOV {ADDRESS}, BH
+		08h MOV {ADDRESS}, BL
+		09h MOV {ADDRESS}, CH
+		0Ah MOV {ADDRESS}, CL
+		0Bh MOV {ADDRESS}, DH
+		0Ch MOV {ADDRESS}, DL
+		0Dh MOV {ADDRESS}, CF
+		0Eh MOV {ADDRESS}, ZF
+		0Fh MOV {ADDRESS}, SF
+		10h MOV {ADDRESS}, SP
+		11h MOV {ADDRESS}, SS
+		12h MOV {ADDRESS}, IP
+		13h MOV {ADDRESS}, CS
+		14h MOV {ADDRESS}, SI
+		15h MOV {ADDRESS}, DI
+		16h MOV {ADDRESS}, DS
+		17h MOV {ADDRESS}, ES
+	MOV AX
+		18h MOV AX,  {ADDRESS}
+		19h MOV AX,  AX
+		1Ah MOV AX,  BX
+		1Bh MOV AX,  CX
+		1Ch MOV AX,  DX
+		1Dh MOV AX,  AH
+		1Eh MOV AX,  AL
+		1Fh MOV AX,  BH
+		20h MOV AX,  BL
+		21h MOV AX,  CH
+		22h MOV AX,  CL
+		23h MOV AX,  DH
+		24h MOV AX,  DL
+		25h MOV AX,  CF
+		26h MOV AX,  ZF
+		27h MOV AX,  SF
+		28h MOV AX,  SP
+		29h MOV AX,  SS
+		2Ah MOV AX,  IP
+		2Bh MOV AX,  CS
+		2Ch MOV AX,  SI
+		2Dh MOV AX,  DI
+		2Eh MOV AX,  DS
+		2Fh MOV AX,  ES
+	MOV BX
+		30h MOV BX,  {ADDRESS}
+		31h MOV BX,  AX
+		32h MOV BX,  BX
+		33h MOV BX,  CX
+		34h MOV BX,  DX
+		35h MOV BX,  AH
+		36h MOV BX,  AL
+		37h MOV BX,  BH
+		38h MOV BX,  BL
+		39h MOV BX,  CH
+		3Ah MOV BX,  CL
+		3Bh MOV BX,  DH
+		3Ch MOV BX,  DL
+		3Dh MOV BX,  CF
+		3Eh MOV BX,  ZF
+		3Fh MOV BX,  SF
+		40h MOV BX,  SP
+		41h MOV BX,  SS
+		42h MOV BX,  IP
+		43h MOV BX,  CS
+		44h MOV BX,  SI
+		45h MOV BX,  DI
+		46h MOV BX,  DS
+		47h MOV BX,  ES
+	MOV CX
+		48h MOV CX,  {ADDRESS}
+		49h MOV CX,  AX
+		4Ah MOV CX,  BX
+		4Bh MOV CX,  CX
+		4Ch MOV CX,  DX
+		4Dh MOV CX,  AH
+		4Eh MOV CX,  AL
+		4Fh MOV CX,  BH
+		50h MOV CX,  BL
+		51h MOV CX,  CH
+		52h MOV CX,  CL
+		53h MOV CX,  DH
+		54h MOV CX,  DL
+		55h MOV CX,  CF
+		56h MOV CX,  ZF
+		57h MOV CX,  SF
+		58h MOV CX,  SP
+		59h MOV CX,  SS
+		5Ah MOV CX,  IP
+		5Bh MOV CX,  CS
+		5Ch MOV CX,  SI
+		5Dh MOV CX,  DI
+		5Eh MOV CX,  DS
+		5Fh MOV CX,  ES
+	MOV DX
+		60h MOV DX,  {ADDRESS}
+		61h MOV DX,  AX
+		62h MOV DX,  BX
+		63h MOV DX,  CX
+		64h MOV DX,  DX
+		65h MOV DX,  AH
+		66h MOV DX,  AL
+		67h MOV DX,  BH
+		68h MOV DX,  BL
+		69h MOV DX,  CH
+		6Ah MOV DX,  CL
+		6Bh MOV DX,  DH
+		6Ch MOV DX,  DL
+		6Dh MOV DX,  CF
+		6Eh MOV DX,  ZF
+		6Fh MOV DX,  SF
+		70h MOV DX,  SP
+		71h MOV DX,  SS
+		72h MOV DX,  IP
+		73h MOV DX,  CS
+		74h MOV DX,  SI
+		75h MOV DX,  DI
+		76h MOV DX,  DS
+		77h MOV DX,  ES
+	MOV AH
+		78h MOV AH,  {ADDRESS}
+		79h MOV AH,  AX
+		7Ah MOV AH,  BX
+		7Bh MOV AH,  CX
+		7Ch MOV AH,  DX
+		7Dh MOV AH,  AH
+		7Eh MOV AH,  AL
+		7Fh MOV AH,  BH
+		80h MOV AH,  BL
+		81h MOV AH,  CH
+		82h MOV AH,  CL
+		83h MOV AH,  DH
+		84h MOV AH,  DL
+		85h MOV AH,  CF
+		86h MOV AH,  ZF
+		87h MOV AH,  SF
+		88h MOV AH,  SP
+		89h MOV AH,  SS
+		8Ah MOV AH,  IP
+		8Bh MOV AH,  CS
+		8Ch MOV AH,  SI
+		8Dh MOV AH,  DI
+		8Eh MOV AH,  DS
+		8Fh MOV AH,  ES
+	MOV AL
+		90h MOV AL,  {ADDRESS}
+		91h MOV AL,  AX
+		92h MOV AL,  BX
+		93h MOV AL,  CX
+		94h MOV AL,  DX
+		95h MOV AL,  AH
+		96h MOV AL,  AL
+		97h MOV AL,  BH
+		98h MOV AL,  BL
+		99h MOV AL,  CH
+		9Ah MOV AL,  CL
+		9Bh MOV AL,  DH
+		9Ch MOV AL,  DL
+		9Dh MOV AL,  CF
+		9Eh MOV AL,  ZF
+		9Fh MOV AL,  SF
+		A0h MOV AL,  SP
+		A1h MOV AL,  SS
+		A2h MOV AL,  IP
+		A3h MOV AL,  CS
+		A4h MOV AL,  SI
+		A5h MOV AL,  DI
+		A6h MOV AL,  DS
+		A7h MOV AL,  ES
+	MOV BH
+		A8h MOV BH,  {ADDRESS}
+		A9h MOV BH,  AX
+		AAh MOV BH,  BX
+		ABh MOV BH,  CX
+		ACh MOV BH,  DX
+		ADh MOV BH,  AH
+		AEh MOV BH,  AL
+		AFh MOV BH,  BH
+		B0h MOV BH,  BL
+		B1h MOV BH,  CH
+		B2h MOV BH,  CL
+		B3h MOV BH,  DH
+		B4h MOV BH,  DL
+		B5h MOV BH,  CF
+		B6h MOV BH,  ZF
+		B7h MOV BH,  SF
+		B8h MOV BH,  SP
+		B9h MOV BH,  SS
+		BAh MOV BH,  IP
+		BBh MOV BH,  CS
+		BCh MOV BH,  SI
+		BDh MOV BH,  DI
+		BEh MOV BH,  DS
+		BFh MOV BH,  ES
+	MOV BL
+		C0h MOV BL,  {ADDRESS}
+		C1h MOV BL,  AX
+		C2h MOV BL,  BX
+		C3h MOV BL,  CX
+		C4h MOV BL,  DX
+		C5h MOV BL,  AH
+		C6h MOV BL,  AL
+		C7h MOV BL,  BH
+		C8h MOV BL,  BL
+		C9h MOV BL,  CH
+		CAh MOV BL,  CL
+		CBh MOV BL,  DH
+		CCh MOV BL,  DL
+		CDh MOV BL,  CF
+		CEh MOV BL,  ZF
+		CFh MOV BL,  SF
+		D0h MOV BL,  SP
+		D1h MOV BL,  SS
+		D2h MOV BL,  IP
+		D3h MOV BL,  CS
+		D4h MOV BL,  SI
+		D5h MOV BL,  DI
+		D6h MOV BL,  DS
+		D7h MOV BL,  ES
+	MOV CH
+		D8h MOV CH,  {ADDRESS}
+		D9h MOV CH,  AX
+		DAh MOV CH,  BX
+		DBh MOV CH,  CX
+		DCh MOV CH,  DX
+		DDh MOV CH,  AH
+		DEh MOV CH,  AL
+		DFh MOV CH,  BH
+		E0h MOV CH,  BL
+		E1h MOV CH,  CH
+		E2h MOV CH,  CL
+		E3h MOV CH,  DH
+		E4h MOV CH,  DL
+		E5h MOV CH,  CF
+		E6h MOV CH,  ZF
+		E7h MOV CH,  SF
+		E8h MOV CH,  SP
+		E9h MOV CH,  SS
+		EAh MOV CH,  IP
+		EBh MOV CH,  CS
+		ECh MOV CH,  SI
+		EDh MOV CH,  DI
+		EEh MOV CH,  DS
+		EFh MOV CH,  ES
+	MOV CL
+		F0h MOV CL,  {ADDRESS}
+		F1h MOV CL,  AX
+		F2h MOV CL,  BX
+		F3h MOV CL,  CX
+		F4h MOV CL,  DX
+		F5h MOV CL,  AH
+		F6h MOV CL,  AL
+		F7h MOV CL,  BH
+		F8h MOV CL,  BL
+		F9h MOV CL,  CH
+		FAh MOV CL,  CL
+		FBh MOV CL,  DH
+		FCh MOV CL,  DL
+		FDh MOV CL,  CF
+		FEh MOV CL,  ZF
+		FFh MOV CL,  SF
+	31h MOV SECOND PAGE
+		00h MOV CL,  SP
+		01h MOV CL,  SS
+		02h MOV CL,  IP
+		03h MOV CL,  CS
+		04h MOV CL,  SI
+		05h MOV CL,  DI
+		06h MOV CL,  DS
+		07h MOV CL,  ES
+	MOV DH
+		08h MOV DH,  {ADDRESS}
+		09h MOV DH,  AX
+		0Ah MOV DH,  BX
+		0Bh MOV DH,  CX
+		0Ch MOV DH,  DX
+		0Dh MOV DH,  AH
+		0Eh MOV DH,  AL
+		0Fh MOV DH,  BH
+		10h MOV DH,  BL
+		11h MOV DH,  CH
+		12h MOV DH,  CL
+		13h MOV DH,  DH
+		14h MOV DH,  DL
+		15h MOV DH,  CF
+		16h MOV DH,  ZF
+		17h MOV DH,  SF
+		18h MOV DH,  SP
+		19h MOV DH,  SS
+		1Ah MOV DH,  IP
+		1Bh MOV DH,  CS
+		1Ch MOV DH,  SI
+		1Dh MOV DH,  DI
+		1Eh MOV DH,  DS
+		1Fh MOV DH,  ES
+	MOV DL
+		20h MOV DL,  {ADDRESS}
+		21h MOV DL,  AX
+		22h MOV DL,  BX
+		23h MOV DL,  CX
+		24h MOV DL,  DX
+		25h MOV DL,  AH
+		26h MOV DL,  AL
+		27h MOV DL,  BH
+		28h MOV DL,  BL
+		29h MOV DL,  CH
+		2Ah MOV DL,  CL
+		2Bh MOV DL,  DH
+		2Ch MOV DL,  DL
+		2Dh MOV DL,  CF
+		2Eh MOV DL,  ZF
+		2Fh MOV DL,  SF
+		30h MOV DL,  SP
+		31h MOV DL,  SS
+		32h MOV DL,  IP
+		33h MOV DL,  CS
+		34h MOV DL,  SI
+		35h MOV DL,  DI
+		36h MOV DL,  DS
+		37h MOV DL,  ES
+	MOV CF
+		38h MOV CF,  {ADDRESS}
+		39h MOV CF,  AX
+		3Ah MOV CF,  BX
+		3Bh MOV CF,  CX
+		3Ch MOV CF,  DX
+		3Dh MOV CF,  AH
+		3Eh MOV CF,  AL
+		3Fh MOV CF,  BH
+		40h MOV CF,  BL
+		41h MOV CF,  CH
+		42h MOV CF,  CL
+		43h MOV CF,  DH
+		44h MOV CF,  DL
+		45h MOV CF,  CF
+		46h MOV CF,  ZF
+		47h MOV CF,  SF
+		48h MOV CF,  SP
+		49h MOV CF,  SS
+		4Ah MOV CF,  IP
+		4Bh MOV CF,  CS
+		4Ch MOV CF,  SI
+		4Dh MOV CF,  DI
+		4Eh MOV CF,  DS
+		4Fh MOV CF,  ES
+	MOV ZF
+		50h MOV ZF,  {ADDRESS}
+		51h MOV ZF,  AX
+		52h MOV ZF,  BX
+		53h MOV ZF,  CX
+		54h MOV ZF,  DX
+		55h MOV ZF,  AH
+		56h MOV ZF,  AL
+		57h MOV ZF,  BH
+		58h MOV ZF,  BL
+		59h MOV ZF,  CH
+		5Ah MOV ZF,  CL
+		5Bh MOV ZF,  DH
+		5Ch MOV ZF,  DL
+		5Dh MOV ZF,  CF
+		5Eh MOV ZF,  ZF
+		5Fh MOV ZF,  SF
+		60h MOV ZF,  SP
+		61h MOV ZF,  SS
+		62h MOV ZF,  IP
+		63h MOV ZF,  CS
+		64h MOV ZF,  SI
+		65h MOV ZF,  DI
+		66h MOV ZF,  DS
+		67h MOV ZF,  ES
+	MOV SF
+		68h MOV SF,  {ADDRESS}
+		69h MOV SF,  AX
+		6Ah MOV SF,  BX
+		6Bh MOV SF,  CX
+		6Ch MOV SF,  DX
+		6Dh MOV SF,  AH
+		6Eh MOV SF,  AL
+		6Fh MOV SF,  BH
+		70h MOV SF,  BL
+		71h MOV SF,  CH
+		72h MOV SF,  CL
+		73h MOV SF,  DH
+		74h MOV SF,  DL
+		75h MOV SF,  CF
+		76h MOV SF,  ZF
+		77h MOV SF,  SF
+		78h MOV SF,  SP
+		79h MOV SF,  SS
+		7Ah MOV SF,  IP
+		7Bh MOV SF,  CS
+		7Ch MOV SF,  SI
+		7Dh MOV SF,  DI
+		7Eh MOV SF,  DS
+		7Fh MOV SF,  ES
+	MOV SP
+		80h MOV SP,  {ADDRESS}
+		81h MOV SP,  AX
+		82h MOV SP,  BX
+		83h MOV SP,  CX
+		84h MOV SP,  DX
+		85h MOV SP,  AH
+		86h MOV SP,  AL
+		87h MOV SP,  BH
+		88h MOV SP,  BL
+		89h MOV SP,  CH
+		8Ah MOV SP,  CL
+		8Bh MOV SP,  DH
+		8Ch MOV SP,  DL
+		8Dh MOV SP,  CF
+		8Eh MOV SP,  ZF
+		8Fh MOV SP,  SF
+		90h MOV SP,  SP
+		91h MOV SP,  SS
+		92h MOV SP,  IP
+		93h MOV SP,  CS
+		94h MOV SP,  SI
+		95h MOV SP,  DI
+		96h MOV SP,  DS
+		97h MOV SP,  ES
+	MOV SS
+		98h MOV SS,  {ADDRESS}
+		99h MOV SS,  AX
+		9Ah MOV SS,  BX
+		9Bh MOV SS,  CX
+		9Ch MOV SS,  DX
+		9Dh MOV SS,  AH
+		9Eh MOV SS,  AL
+		9Fh MOV SS,  BH
+		90h MOV SS,  BL
+		91h MOV SS,  CH
+		92h MOV SS,  CL
+		93h MOV SS,  DH
+		94h MOV SS,  DL
+		95h MOV SS,  CF
+		96h MOV SS,  ZF
+		97h MOV SS,  SF
+		98h MOV SS,  SP
+		99h MOV SS,  SS
+		9Ah MOV SS,  IP
+		9Bh MOV SS,  CS
+		9Ch MOV SS,  SI
+		9Dh MOV SS,  DI
+		9Eh MOV SS,  DS
+		9Fh MOV SS,  ES
+	MOV IP
+		A0h MOV IP,  {ADDRESS}
+		A1h MOV IP,  AX
+		A2h MOV IP,  BX
+		A3h MOV IP,  CX
+		A4h MOV IP,  DX
+		A5h MOV IP,  AH
+		A6h MOV IP,  AL
+		A7h MOV IP,  BH
+		A8h MOV IP,  BL
+		A9h MOV IP,  CH
+		AAh MOV IP,  CL
+		ABh MOV IP,  DH
+		ACh MOV IP,  DL
+		ADh MOV IP,  CF
+		AEh MOV IP,  ZF
+		AFh MOV IP,  SF
+		B0h MOV IP,  SP
+		B1h MOV IP,  SS
+		B2h MOV IP,  IP
+		B3h MOV IP,  CS
+		B4h MOV IP,  SI
+		B5h MOV IP,  DI
+		B6h MOV IP,  DS
+		B7h MOV IP,  ES
+	MOV CS
+		B8h MOV CS,  {ADDRESS}
+		B9h MOV CS,  AX
+		BAh MOV CS,  BX
+		BBh MOV CS,  CX
+		BCh MOV CS,  DX
+		BDh MOV CS,  AH
+		BEh MOV CS,  AL
+		BFh MOV CS,  BH
+		C0h MOV CS,  BL
+		C1h MOV CS,  CH
+		C2h MOV CS,  CL
+		C3h MOV CS,  DH
+		C4h MOV CS,  DL
+		C5h MOV CS,  CF
+		C6h MOV CS,  ZF
+		C7h MOV CS,  SF
+		C8h MOV CS,  SP
+		C9h MOV CS,  SS
+		CAh MOV CS,  IP
+		CBh MOV CS,  CS
+		CCh MOV CS,  SI
+		CDh MOV CS,  DI
+		CEh MOV CS,  DS
+		CFh MOV CS,  ES
+	MOV SI
+		D0h MOV SI,  {ADDRESS}
+		D1h MOV SI,  AX
+		D2h MOV SI,  BX
+		D3h MOV SI,  CX
+		D4h MOV SI,  DX
+		D5h MOV SI,  AH
+		D6h MOV SI,  AL
+		D7h MOV SI,  BH
+		D8h MOV SI,  BL
+		D9h MOV SI,  CH
+		DAh MOV SI,  CL
+		DBh MOV SI,  DH
+		DCh MOV SI,  DL
+		DDh MOV SI,  CF
+		DEh MOV SI,  ZF
+		DFh MOV SI,  SF
+		E0h MOV SI,  SP
+		E1h MOV SI,  SS
+		E2h MOV SI,  IP
+		E3h MOV SI,  CS
+		E4h MOV SI,  SI
+		E5h MOV SI,  DI
+		E6h MOV SI,  DS
+		E7h MOV SI,  ES
+	MOV DI
+		E8h MOV DI,  {ADDRESS}
+		E9h MOV DI,  AX
+		EAh MOV DI,  BX
+		EBh MOV DI,  CX
+		ECh MOV DI,  DX
+		EDh MOV DI,  AH
+		EEh MOV DI,  AL
+		EFh MOV DI,  BH
+		F0h MOV DI,  BL
+		F1h MOV DI,  CH
+		F2h MOV DI,  CL
+		F3h MOV DI,  DH
+		F4h MOV DI,  DL
+		F5h MOV DI,  CF
+		F6h MOV DI,  ZF
+		F7h MOV DI,  SF
+		F8h MOV DI,  SP
+		F9h MOV DI,  SS
+		FAh MOV DI,  IP
+		FBh MOV DI,  CS
+		FCh MOV DI,  SI
+		FDh MOV DI,  DI
+		FEh MOV DI,  DS
+		FFh MOV DI,  ES
+	32h MOV THIRD PAGE	
+	MOV DS
+		00h MOV DS,  {ADDRESS}
+		01h MOV DS,  AX
+		02h MOV DS,  BX
+		03h MOV DS,  CX
+		04h MOV DS,  DX
+		05h MOV DS,  AH
+		06h MOV DS,  AL
+		07h MOV DS,  BH
+		08h MOV DS,  BL
+		09h MOV DS,  CH
+		0Ah MOV DS,  CL
+		0Bh MOV DS,  DH
+		0Ch MOV DS,  DL
+		0Dh MOV DS,  CF
+		0Eh MOV DS,  ZF
+		0Fh MOV DS,  SF
+		10h MOV DS,  SP
+		11h MOV DS,  SS
+		12h MOV DS,  IP
+		13h MOV DS,  CS
+		14h MOV DS,  SI
+		15h MOV DS,  DI
+		16h MOV DS,  DS
+		17h MOV DS,  ES
+	MOV ES
+		18h MOV ES,  {ADDRESS}
+		19h MOV ES,  AX
+		1Ah MOV ES,  BX
+		1Bh MOV ES,  CX
+		1Ch MOV ES,  DX
+		1Dh MOV ES,  AH
+		1Eh MOV ES,  AL
+		1Fh MOV ES,  BH
+		20h MOV ES,  BL
+		21h MOV ES,  CH
+		22h MOV ES,  CL
+		23h MOV ES,  DH
+		24h MOV ES,  DL
+		25h MOV ES,  CF
+		26h MOV ES,  ZF
+		27h MOV ES,  SF
+		28h MOV ES,  SP
+		29h MOV ES,  SS
+		2Ah MOV ES,  IP
+		2Bh MOV ES,  CS
+		2Ch MOV ES,  SI
+		2Dh MOV ES,  DI
+		2Eh MOV ES,  DS
+		2Fh MOV ES,  ES
+4)  CMP (33h-35h)
+	Description: Compares the values indicated. Result is stored on the flags.
+				 If both are equal, it sets CF = 1. Different values sets CF = 0.
+				 If the first value is greater than the second, sets SF = 0.
+				 If the first value is lower than the second, sets SF = 1.
+				 If the first value is zero, sets ZF = 0.				 
+				 Needs two bytes. 33h is page one, 34h is page two, 35h is page three.
+				 Example:     34 A0 11 0A = CMP IP, [110Ah]
+	33h CMP FIRST PAGE
+	CMP {ADDRESS}
+		##  Command		
+		00h CMP {ADDRESS},{ADDRESS}
+		01h CMP {ADDRESS}, AX
+		02h CMP {ADDRESS}, BX
+		03h CMP {ADDRESS}, CX
+		04h CMP {ADDRESS}, DX
+		05h CMP {ADDRESS}, AH
+		06h CMP {ADDRESS}, AL
+		07h CMP {ADDRESS}, BH
+		08h CMP {ADDRESS}, BL
+		09h CMP {ADDRESS}, CH
+		0Ah CMP {ADDRESS}, CL
+		0Bh CMP {ADDRESS}, DH
+		0Ch CMP {ADDRESS}, DL
+		0Dh CMP {ADDRESS}, CF
+		0Eh CMP {ADDRESS}, ZF
+		0Fh CMP {ADDRESS}, SF
+		10h CMP {ADDRESS}, SP
+		11h CMP {ADDRESS}, SS
+		12h CMP {ADDRESS}, IP
+		13h CMP {ADDRESS}, CS
+		14h CMP {ADDRESS}, SI
+		15h CMP {ADDRESS}, DI
+		16h CMP {ADDRESS}, DS
+		17h CMP {ADDRESS}, ES
+	CMP AX
+		18h CMP AX,  {ADDRESS}
+		19h CMP AX,  AX
+		1Ah CMP AX,  BX
+		1Bh CMP AX,  CX
+		1Ch CMP AX,  DX
+		1Dh CMP AX,  AH
+		1Eh CMP AX,  AL
+		1Fh CMP AX,  BH
+		20h CMP AX,  BL
+		21h CMP AX,  CH
+		22h CMP AX,  CL
+		23h CMP AX,  DH
+		24h CMP AX,  DL
+		25h CMP AX,  CF
+		26h CMP AX,  ZF
+		27h CMP AX,  SF
+		28h CMP AX,  SP
+		29h CMP AX,  SS
+		2Ah CMP AX,  IP
+		2Bh CMP AX,  CS
+		2Ch CMP AX,  SI
+		2Dh CMP AX,  DI
+		2Eh CMP AX,  DS
+		2Fh CMP AX,  ES
+	CMP BX
+		30h CMP BX,  {ADDRESS}
+		31h CMP BX,  AX
+		32h CMP BX,  BX
+		33h CMP BX,  CX
+		34h CMP BX,  DX
+		35h CMP BX,  AH
+		36h CMP BX,  AL
+		37h CMP BX,  BH
+		38h CMP BX,  BL
+		39h CMP BX,  CH
+		3Ah CMP BX,  CL
+		3Bh CMP BX,  DH
+		3Ch CMP BX,  DL
+		3Dh CMP BX,  CF
+		3Eh CMP BX,  ZF
+		3Fh CMP BX,  SF
+		40h CMP BX,  SP
+		41h CMP BX,  SS
+		42h CMP BX,  IP
+		43h CMP BX,  CS
+		44h CMP BX,  SI
+		45h CMP BX,  DI
+		46h CMP BX,  DS
+		47h CMP BX,  ES
+	CMP CX
+		48h CMP CX,  {ADDRESS}
+		49h CMP CX,  AX
+		4Ah CMP CX,  BX
+		4Bh CMP CX,  CX
+		4Ch CMP CX,  DX
+		4Dh CMP CX,  AH
+		4Eh CMP CX,  AL
+		4Fh CMP CX,  BH
+		50h CMP CX,  BL
+		51h CMP CX,  CH
+		52h CMP CX,  CL
+		53h CMP CX,  DH
+		54h CMP CX,  DL
+		55h CMP CX,  CF
+		56h CMP CX,  ZF
+		57h CMP CX,  SF
+		58h CMP CX,  SP
+		59h CMP CX,  SS
+		5Ah CMP CX,  IP
+		5Bh CMP CX,  CS
+		5Ch CMP CX,  SI
+		5Dh CMP CX,  DI
+		5Eh CMP CX,  DS
+		5Fh CMP CX,  ES
+	CMP DX
+		60h CMP DX,  {ADDRESS}
+		61h CMP DX,  AX
+		62h CMP DX,  BX
+		63h CMP DX,  CX
+		64h CMP DX,  DX
+		65h CMP DX,  AH
+		66h CMP DX,  AL
+		67h CMP DX,  BH
+		68h CMP DX,  BL
+		69h CMP DX,  CH
+		6Ah CMP DX,  CL
+		6Bh CMP DX,  DH
+		6Ch CMP DX,  DL
+		6Dh CMP DX,  CF
+		6Eh CMP DX,  ZF
+		6Fh CMP DX,  SF
+		70h CMP DX,  SP
+		71h CMP DX,  SS
+		72h CMP DX,  IP
+		73h CMP DX,  CS
+		74h CMP DX,  SI
+		75h CMP DX,  DI
+		76h CMP DX,  DS
+		77h CMP DX,  ES
+	CMP AH
+		78h CMP AH,  {ADDRESS}
+		79h CMP AH,  AX
+		7Ah CMP AH,  BX
+		7Bh CMP AH,  CX
+		7Ch CMP AH,  DX
+		7Dh CMP AH,  AH
+		7Eh CMP AH,  AL
+		7Fh CMP AH,  BH
+		80h CMP AH,  BL
+		81h CMP AH,  CH
+		82h CMP AH,  CL
+		83h CMP AH,  DH
+		84h CMP AH,  DL
+		85h CMP AH,  CF
+		86h CMP AH,  ZF
+		87h CMP AH,  SF
+		88h CMP AH,  SP
+		89h CMP AH,  SS
+		8Ah CMP AH,  IP
+		8Bh CMP AH,  CS
+		8Ch CMP AH,  SI
+		8Dh CMP AH,  DI
+		8Eh CMP AH,  DS
+		8Fh CMP AH,  ES
+	CMP AL
+		90h CMP AL,  {ADDRESS}
+		91h CMP AL,  AX
+		92h CMP AL,  BX
+		93h CMP AL,  CX
+		94h CMP AL,  DX
+		95h CMP AL,  AH
+		96h CMP AL,  AL
+		97h CMP AL,  BH
+		98h CMP AL,  BL
+		99h CMP AL,  CH
+		9Ah CMP AL,  CL
+		9Bh CMP AL,  DH
+		9Ch CMP AL,  DL
+		9Dh CMP AL,  CF
+		9Eh CMP AL,  ZF
+		9Fh CMP AL,  SF
+		A0h CMP AL,  SP
+		A1h CMP AL,  SS
+		A2h CMP AL,  IP
+		A3h CMP AL,  CS
+		A4h CMP AL,  SI
+		A5h CMP AL,  DI
+		A6h CMP AL,  DS
+		A7h CMP AL,  ES
+	CMP BH
+		A8h CMP BH,  {ADDRESS}
+		A9h CMP BH,  AX
+		AAh CMP BH,  BX
+		ABh CMP BH,  CX
+		ACh CMP BH,  DX
+		ADh CMP BH,  AH
+		AEh CMP BH,  AL
+		AFh CMP BH,  BH
+		B0h CMP BH,  BL
+		B1h CMP BH,  CH
+		B2h CMP BH,  CL
+		B3h CMP BH,  DH
+		B4h CMP BH,  DL
+		B5h CMP BH,  CF
+		B6h CMP BH,  ZF
+		B7h CMP BH,  SF
+		B8h CMP BH,  SP
+		B9h CMP BH,  SS
+		BAh CMP BH,  IP
+		BBh CMP BH,  CS
+		BCh CMP BH,  SI
+		BDh CMP BH,  DI
+		BEh CMP BH,  DS
+		BFh CMP BH,  ES
+	CMP BL
+		C0h CMP BL,  {ADDRESS}
+		C1h CMP BL,  AX
+		C2h CMP BL,  BX
+		C3h CMP BL,  CX
+		C4h CMP BL,  DX
+		C5h CMP BL,  AH
+		C6h CMP BL,  AL
+		C7h CMP BL,  BH
+		C8h CMP BL,  BL
+		C9h CMP BL,  CH
+		CAh CMP BL,  CL
+		CBh CMP BL,  DH
+		CCh CMP BL,  DL
+		CDh CMP BL,  CF
+		CEh CMP BL,  ZF
+		CFh CMP BL,  SF
+		D0h CMP BL,  SP
+		D1h CMP BL,  SS
+		D2h CMP BL,  IP
+		D3h CMP BL,  CS
+		D4h CMP BL,  SI
+		D5h CMP BL,  DI
+		D6h CMP BL,  DS
+		D7h CMP BL,  ES
+	CMP CH
+		D8h CMP CH,  {ADDRESS}
+		D9h CMP CH,  AX
+		DAh CMP CH,  BX
+		DBh CMP CH,  CX
+		DCh CMP CH,  DX
+		DDh CMP CH,  AH
+		DEh CMP CH,  AL
+		DFh CMP CH,  BH
+		E0h CMP CH,  BL
+		E1h CMP CH,  CH
+		E2h CMP CH,  CL
+		E3h CMP CH,  DH
+		E4h CMP CH,  DL
+		E5h CMP CH,  CF
+		E6h CMP CH,  ZF
+		E7h CMP CH,  SF
+		E8h CMP CH,  SP
+		E9h CMP CH,  SS
+		EAh CMP CH,  IP
+		EBh CMP CH,  CS
+		ECh CMP CH,  SI
+		EDh CMP CH,  DI
+		EEh CMP CH,  DS
+		EFh CMP CH,  ES
+	CMP CL
+		F0h CMP CL,  {ADDRESS}
+		F1h CMP CL,  AX
+		F2h CMP CL,  BX
+		F3h CMP CL,  CX
+		F4h CMP CL,  DX
+		F5h CMP CL,  AH
+		F6h CMP CL,  AL
+		F7h CMP CL,  BH
+		F8h CMP CL,  BL
+		F9h CMP CL,  CH
+		FAh CMP CL,  CL
+		FBh CMP CL,  DH
+		FCh CMP CL,  DL
+		FDh CMP CL,  CF
+		FEh CMP CL,  ZF
+		FFh CMP CL,  SF
+	34h CMP SECOND PAGE
+		00h CMP CL,  SP
+		01h CMP CL,  SS
+		02h CMP CL,  IP
+		03h CMP CL,  CS
+		04h CMP CL,  SI
+		05h CMP CL,  DI
+		06h CMP CL,  DS
+		07h CMP CL,  ES
+	CMP DH
+		08h CMP DH,  {ADDRESS}
+		09h CMP DH,  AX
+		0Ah CMP DH,  BX
+		0Bh CMP DH,  CX
+		0Ch CMP DH,  DX
+		0Dh CMP DH,  AH
+		0Eh CMP DH,  AL
+		0Fh CMP DH,  BH
+		10h CMP DH,  BL
+		11h CMP DH,  CH
+		12h CMP DH,  CL
+		13h CMP DH,  DH
+		14h CMP DH,  DL
+		15h CMP DH,  CF
+		16h CMP DH,  ZF
+		17h CMP DH,  SF
+		18h CMP DH,  SP
+		19h CMP DH,  SS
+		1Ah CMP DH,  IP
+		1Bh CMP DH,  CS
+		1Ch CMP DH,  SI
+		1Dh CMP DH,  DI
+		1Eh CMP DH,  DS
+		1Fh CMP DH,  ES
+	CMP DL
+		20h CMP DL,  {ADDRESS}
+		21h CMP DL,  AX
+		22h CMP DL,  BX
+		23h CMP DL,  CX
+		24h CMP DL,  DX
+		25h CMP DL,  AH
+		26h CMP DL,  AL
+		27h CMP DL,  BH
+		28h CMP DL,  BL
+		29h CMP DL,  CH
+		2Ah CMP DL,  CL
+		2Bh CMP DL,  DH
+		2Ch CMP DL,  DL
+		2Dh CMP DL,  CF
+		2Eh CMP DL,  ZF
+		2Fh CMP DL,  SF
+		30h CMP DL,  SP
+		31h CMP DL,  SS
+		32h CMP DL,  IP
+		33h CMP DL,  CS
+		34h CMP DL,  SI
+		35h CMP DL,  DI
+		36h CMP DL,  DS
+		37h CMP DL,  ES
+	CMP CF
+		38h CMP CF,  {ADDRESS}
+		39h CMP CF,  AX
+		3Ah CMP CF,  BX
+		3Bh CMP CF,  CX
+		3Ch CMP CF,  DX
+		3Dh CMP CF,  AH
+		3Eh CMP CF,  AL
+		3Fh CMP CF,  BH
+		40h CMP CF,  BL
+		41h CMP CF,  CH
+		42h CMP CF,  CL
+		43h CMP CF,  DH
+		44h CMP CF,  DL
+		45h CMP CF,  CF
+		46h CMP CF,  ZF
+		47h CMP CF,  SF
+		48h CMP CF,  SP
+		49h CMP CF,  SS
+		4Ah CMP CF,  IP
+		4Bh CMP CF,  CS
+		4Ch CMP CF,  SI
+		4Dh CMP CF,  DI
+		4Eh CMP CF,  DS
+		4Fh CMP CF,  ES
+	CMP ZF
+		50h CMP ZF,  {ADDRESS}
+		51h CMP ZF,  AX
+		52h CMP ZF,  BX
+		53h CMP ZF,  CX
+		54h CMP ZF,  DX
+		55h CMP ZF,  AH
+		56h CMP ZF,  AL
+		57h CMP ZF,  BH
+		58h CMP ZF,  BL
+		59h CMP ZF,  CH
+		5Ah CMP ZF,  CL
+		5Bh CMP ZF,  DH
+		5Ch CMP ZF,  DL
+		5Dh CMP ZF,  CF
+		5Eh CMP ZF,  ZF
+		5Fh CMP ZF,  SF
+		60h CMP ZF,  SP
+		61h CMP ZF,  SS
+		62h CMP ZF,  IP
+		63h CMP ZF,  CS
+		64h CMP ZF,  SI
+		65h CMP ZF,  DI
+		66h CMP ZF,  DS
+		67h CMP ZF,  ES
+	CMP SF
+		68h CMP SF,  {ADDRESS}
+		69h CMP SF,  AX
+		6Ah CMP SF,  BX
+		6Bh CMP SF,  CX
+		6Ch CMP SF,  DX
+		6Dh CMP SF,  AH
+		6Eh CMP SF,  AL
+		6Fh CMP SF,  BH
+		70h CMP SF,  BL
+		71h CMP SF,  CH
+		72h CMP SF,  CL
+		73h CMP SF,  DH
+		74h CMP SF,  DL
+		75h CMP SF,  CF
+		76h CMP SF,  ZF
+		77h CMP SF,  SF
+		78h CMP SF,  SP
+		79h CMP SF,  SS
+		7Ah CMP SF,  IP
+		7Bh CMP SF,  CS
+		7Ch CMP SF,  SI
+		7Dh CMP SF,  DI
+		7Eh CMP SF,  DS
+		7Fh CMP SF,  ES
+	CMP SP
+		80h CMP SP,  {ADDRESS}
+		81h CMP SP,  AX
+		82h CMP SP,  BX
+		83h CMP SP,  CX
+		84h CMP SP,  DX
+		85h CMP SP,  AH
+		86h CMP SP,  AL
+		87h CMP SP,  BH
+		88h CMP SP,  BL
+		89h CMP SP,  CH
+		8Ah CMP SP,  CL
+		8Bh CMP SP,  DH
+		8Ch CMP SP,  DL
+		8Dh CMP SP,  CF
+		8Eh CMP SP,  ZF
+		8Fh CMP SP,  SF
+		90h CMP SP,  SP
+		91h CMP SP,  SS
+		92h CMP SP,  IP
+		93h CMP SP,  CS
+		94h CMP SP,  SI
+		95h CMP SP,  DI
+		96h CMP SP,  DS
+		97h CMP SP,  ES
+	CMP SS
+		98h CMP SS,  {ADDRESS}
+		99h CMP SS,  AX
+		9Ah CMP SS,  BX
+		9Bh CMP SS,  CX
+		9Ch CMP SS,  DX
+		9Dh CMP SS,  AH
+		9Eh CMP SS,  AL
+		9Fh CMP SS,  BH
+		90h CMP SS,  BL
+		91h CMP SS,  CH
+		92h CMP SS,  CL
+		93h CMP SS,  DH
+		94h CMP SS,  DL
+		95h CMP SS,  CF
+		96h CMP SS,  ZF
+		97h CMP SS,  SF
+		98h CMP SS,  SP
+		99h CMP SS,  SS
+		9Ah CMP SS,  IP
+		9Bh CMP SS,  CS
+		9Ch CMP SS,  SI
+		9Dh CMP SS,  DI
+		9Eh CMP SS,  DS
+		9Fh CMP SS,  ES
+	CMP IP
+		A0h CMP IP,  {ADDRESS}
+		A1h CMP IP,  AX
+		A2h CMP IP,  BX
+		A3h CMP IP,  CX
+		A4h CMP IP,  DX
+		A5h CMP IP,  AH
+		A6h CMP IP,  AL
+		A7h CMP IP,  BH
+		A8h CMP IP,  BL
+		A9h CMP IP,  CH
+		AAh CMP IP,  CL
+		ABh CMP IP,  DH
+		ACh CMP IP,  DL
+		ADh CMP IP,  CF
+		AEh CMP IP,  ZF
+		AFh CMP IP,  SF
+		B0h CMP IP,  SP
+		B1h CMP IP,  SS
+		B2h CMP IP,  IP
+		B3h CMP IP,  CS
+		B4h CMP IP,  SI
+		B5h CMP IP,  DI
+		B6h CMP IP,  DS
+		B7h CMP IP,  ES
+	CMP CS
+		B8h CMP CS,  {ADDRESS}
+		B9h CMP CS,  AX
+		BAh CMP CS,  BX
+		BBh CMP CS,  CX
+		BCh CMP CS,  DX
+		BDh CMP CS,  AH
+		BEh CMP CS,  AL
+		BFh CMP CS,  BH
+		C0h CMP CS,  BL
+		C1h CMP CS,  CH
+		C2h CMP CS,  CL
+		C3h CMP CS,  DH
+		C4h CMP CS,  DL
+		C5h CMP CS,  CF
+		C6h CMP CS,  ZF
+		C7h CMP CS,  SF
+		C8h CMP CS,  SP
+		C9h CMP CS,  SS
+		CAh CMP CS,  IP
+		CBh CMP CS,  CS
+		CCh CMP CS,  SI
+		CDh CMP CS,  DI
+		CEh CMP CS,  DS
+		CFh CMP CS,  ES
+	CMP SI
+		D0h CMP SI,  {ADDRESS}
+		D1h CMP SI,  AX
+		D2h CMP SI,  BX
+		D3h CMP SI,  CX
+		D4h CMP SI,  DX
+		D5h CMP SI,  AH
+		D6h CMP SI,  AL
+		D7h CMP SI,  BH
+		D8h CMP SI,  BL
+		D9h CMP SI,  CH
+		DAh CMP SI,  CL
+		DBh CMP SI,  DH
+		DCh CMP SI,  DL
+		DDh CMP SI,  CF
+		DEh CMP SI,  ZF
+		DFh CMP SI,  SF
+		E0h CMP SI,  SP
+		E1h CMP SI,  SS
+		E2h CMP SI,  IP
+		E3h CMP SI,  CS
+		E4h CMP SI,  SI
+		E5h CMP SI,  DI
+		E6h CMP SI,  DS
+		E7h CMP SI,  ES
+	CMP DI
+		E8h CMP DI,  {ADDRESS}
+		E9h CMP DI,  AX
+		EAh CMP DI,  BX
+		EBh CMP DI,  CX
+		ECh CMP DI,  DX
+		EDh CMP DI,  AH
+		EEh CMP DI,  AL
+		EFh CMP DI,  BH
+		F0h CMP DI,  BL
+		F1h CMP DI,  CH
+		F2h CMP DI,  CL
+		F3h CMP DI,  DH
+		F4h CMP DI,  DL
+		F5h CMP DI,  CF
+		F6h CMP DI,  ZF
+		F7h CMP DI,  SF
+		F8h CMP DI,  SP
+		F9h CMP DI,  SS
+		FAh CMP DI,  IP
+		FBh CMP DI,  CS
+		FCh CMP DI,  SI
+		FDh CMP DI,  DI
+		FEh CMP DI,  DS
+		FFh CMP DI,  ES
+	35h CMP THIRD PAGE	
+	CMP DS
+		00h CMP DS,  {ADDRESS}
+		01h CMP DS,  AX
+		02h CMP DS,  BX
+		03h CMP DS,  CX
+		04h CMP DS,  DX
+		05h CMP DS,  AH
+		06h CMP DS,  AL
+		07h CMP DS,  BH
+		08h CMP DS,  BL
+		09h CMP DS,  CH
+		0Ah CMP DS,  CL
+		0Bh CMP DS,  DH
+		0Ch CMP DS,  DL
+		0Dh CMP DS,  CF
+		0Eh CMP DS,  ZF
+		0Fh CMP DS,  SF
+		10h CMP DS,  SP
+		11h CMP DS,  SS
+		12h CMP DS,  IP
+		13h CMP DS,  CS
+		14h CMP DS,  SI
+		15h CMP DS,  DI
+		16h CMP DS,  DS
+		17h CMP DS,  ES
+	CMP ES
+		18h CMP ES,  {ADDRESS}
+		19h CMP ES,  AX
+		1Ah CMP ES,  BX
+		1Bh CMP ES,  CX
+		1Ch CMP ES,  DX
+		1Dh CMP ES,  AH
+		1Eh CMP ES,  AL
+		1Fh CMP ES,  BH
+		20h CMP ES,  BL
+		21h CMP ES,  CH
+		22h CMP ES,  CL
+		23h CMP ES,  DH
+		24h CMP ES,  DL
+		25h CMP ES,  CF
+		26h CMP ES,  ZF
+		27h CMP ES,  SF
+		28h CMP ES,  SP
+		29h CMP ES,  SS
+		2Ah CMP ES,  IP
+		2Bh CMP ES,  CS
+		2Ch CMP ES,  SI
+		2Dh CMP ES,  DI
+		2Eh CMP ES,  DS
+		2Fh CMP ES,  ES
+5)  MATH Functions(36h)
+	Math functions have two bytes. The first byte is always 36h.
+	Example:   3603     ADD CX
+	5.1) ADD
+		Description: Adds the indicated value to AX and returns the value to AX.
+		##  Command
+		00h ADD {ADDRESS}
+		01h ADD AX
+		02h ADD BX
+		03h ADD CX
+		04h ADD DX
+		05h ADD AH
+		06h ADD AL
+		07h ADD BH
+		08h ADD BL
+		09h ADD CH
+		0Ah ADD CL
+		0Bh ADD DH
+		0Ch ADD DL
+		0Dh ADD CF
+		0Eh ADD ZF
+		0Fh ADD SF
+		10h ADD SP
+		11h ADD SS
+		12h ADD IP
+		13h ADD CS
+		14h ADD SI
+		15h ADD DI
+		16h ADD DS
+		17h ADD ES		
+	5.2) SUB
+		Description: Stores value in the top of the stack.
+		##  Command
+		18h SUB {ADDRESS}
+		19h SUB AX
+		1Ah SUB BX
+		1Bh SUB CX
+		1Ch SUB DX
+		1Dh SUB AH
+		1Eh SUB AL
+		1Fh SUB BH
+		20h SUB BL
+		21h SUB CH
+		22h SUB CL
+		23h SUB DH
+		24h SUB DL
+		25h SUB CF
+		26h SUB ZF
+		27h SUB SF
+		28h SUB SP
+		29h SUB SS
+		2Ah SUB IP
+		2Bh SUB CS
+		2Ch SUB SI
+		2Dh SUB DI
+		2Eh SUB DS
+		2Fh SUB ES			
+	5.3) MULT
+		Description: Stores value in the top of the stack.
+		##  Command
+		30h MULT {ADDRESS}
+		31h MULT AX
+		32h MULT BX
+		33h MULT CX
+		34h MULT DX
+		35h MULT AH
+		36h MULT AL
+		37h MULT BH
+		38h MULT BL
+		39h MULT CH
+		3Ah MULT CL
+		3Bh MULT DH
+		3Ch MULT DL
+		3Dh MULT CF
+		3Eh MULT ZF
+		3Fh MULT SF
+		40h MULT SP
+		41h MULT SS
+		42h MULT IP
+		43h MULT CS
+		44h MULT SI
+		45h MULT DI
+		46h MULT DS
+		47h MULT ES			
+	5.4) DIV
+		Description: Stores value in the top of the stack.
+		##  Command
+		48h DIV {ADDRESS}
+		49h DIV AX
+		4Ah DIV BX
+		4Bh DIV CX
+		4Ch DIV DX
+		4Dh DIV AH
+		4Eh DIV AL
+		4Fh DIV BH
+		50h DIV BL
+		51h DIV CH
+		52h DIV CL
+		53h DIV DH
+		54h DIV DL
+		55h DIV CF
+		56h DIV ZF
+		57h DIV SF
+		58h DIV SP
+		59h DIV SS
+		5Ah DIV IP
+		5Bh DIV CS
+		5Ch DIV SI
+		5Dh DIV DI
+		5Eh DIV DS
+		5Fh DIV ES			
+	5.5) AND
+		Description: Stores value in the top of the stack.
+		##  Command
+		60h AND {ADDRESS}
+		61h AND AX
+		62h AND BX
+		63h AND CX
+		64h AND DX
+		65h AND AH
+		66h AND AL
+		67h AND BH
+		68h AND BL
+		69h AND CH
+		6Ah AND CL
+		6Bh AND DH
+		6Ch AND DL
+		6Dh AND CF
+		6Eh AND ZF
+		6Fh AND SF
+		70h AND SP
+		71h AND SS
+		72h AND IP
+		73h AND CS
+		74h AND SI
+		75h AND DI
+		76h AND DS
+		77h AND ES			
+	5.6) OR
+		Description: Stores value in the top of the stack.
+		##  Command
+		78h OR {ADDRESS}
+		79h OR AX
+		7Ah OR BX
+		7Bh OR CX
+		7Ch OR DX
+		7Dh OR AH
+		7Eh OR AL
+		7Fh OR BH
+		80h OR BL
+		81h OR CH
+		82h OR CL
+		83h OR DH
+		84h OR DL
+		85h OR CF
+		86h OR ZF
+		87h OR SF
+		88h OR SP
+		89h OR SS
+		8Ah OR IP
+		8Bh OR CS
+		8Ch OR SI
+		8Dh OR DI
+		8Eh OR DS
+		8Fh OR ES			
+	5.7) NOT
+		Description: Stores value in the top of the stack.
+		##  Command
+		90h NOT {ADDRESS}
+		91h NOT AX
+		92h NOT BX
+		93h NOT CX
+		94h NOT DX
+		95h NOT AH
+		96h NOT AL
+		97h NOT BH
+		98h NOT BL
+		99h NOT CH
+		9Ah NOT CL
+		9Bh NOT DH
+		9Ch NOT DL
+		9Dh NOT CF
+		9Eh NOT ZF
+		9Fh NOT SF
+		A0h NOT SP
+		A1h NOT SS
+		A2h NOT IP
+		A3h NOT CS
+		A4h NOT SI
+		A5h NOT DI
+		A6h NOT DS
+		A7h NOT ES			
+	5.8) NAND
+		Description: Stores value in the top of the stack.
+		##  Command
+		A8h NAND {ADDRESS}
+		A9h NAND AX
+		AAh NAND BX
+		ABh NAND CX
+		ACh NAND DX
+		ADh NAND AH
+		AEh NAND AL
+		AFh NAND BH
+		B0h NAND BL
+		B1h NAND CH
+		B2h NAND CL
+		B3h NAND DH
+		B4h NAND DL
+		B5h NAND CF
+		B6h NAND ZF
+		B7h NAND SF
+		B8h NAND SP
+		B9h NAND SS
+		BAh NAND IP
+		BBh NAND CS
+		BCh NAND SI
+		BDh NAND DI
+		BEh NAND DS
+		BFh NAND ES			
+	5.9) NOR
+		Description: Stores value in the top of the stack.
+		##  Command
+		C0h NOR {ADDRESS}
+		C1h NOR AX
+		C2h NOR BX
+		C3h NOR CX
+		C4h NOR DX
+		C5h NOR AH
+		C6h NOR AL
+		C7h NOR BH
+		C8h NOR BL
+		C9h NOR CH
+		CAh NOR CL
+		CBh NOR DH
+		CCh NOR DL
+		CDh NOR CF
+		CEh NOR ZF
+		CFh NOR SF
+		D0h NOR SP
+		D1h NOR SS
+		D2h NOR IP
+		D3h NOR CS
+		D4h NOR SI
+		D5h NOR DI
+		D6h NOR DS
+		D7h NOR ES			
+	5.10)XOR
+		Description: Stores value in the top of the stack.
+		##  Command
+		D8h XOR {ADDRESS}
+		D9h XOR AX
+		DAh XOR BX
+		DBh XOR CX
+		DCh XOR DX
+		DDh XOR AH
+		DEh XOR AL
+		DFh XOR BH
+		E0h XOR BL
+		E1h XOR CH
+		E2h XOR CL
+		E3h XOR DH
+		E4h XOR DL
+		E5h XOR CF
+		E6h XOR ZF
+		E7h XOR SF
+		E8h XOR SP
+		E9h XOR SS
+		EAh XOR IP
+		EBh XOR CS
+		ECh XOR SI
+		EDh XOR DI
+		EEh XOR DS
+		EFh XOR ES			
+6)  JMPs (37h-38h)
+	Jumps thru parts of the code. Divided in Address Jumps (JMP,JZ,JNZ,JE,JNE,JG,JGE,JL,JLE) 
+	and Relative Close Jumps(CJMP,CJZ,CJNZ,CJE,CJNE,CJG,CJGE,CJL,CJLE). 
+	6.1)JMP (37h-38h)
+		Description: Inconditionally Jumps to Indicated Address Value. 
+					 One byte word.
+		##  Command		
+		37h JMP {ADDRESS}
+
+		CJMP
+		Description: Inconditionally Jumps to Indicated Relative Instruction Value.
+					 Jump forward or backwards is done by reading flag DF.
+					 Two bytes word. First byte is always 38h.
+		38h CJMP 
+			##  Command		
+			00h CJMP (Number)
+			01h CJMP AX
+			02h CJMP BX
+			03h CJMP CX
+			04h CJMP DX
+			05h CJMP AH
+			06h CJMP AL
+			07h CJMP BH
+			08h CJMP BL
+			09h CJMP CH
+			0Ah CJMP CL
+			0Bh CJMP DH
+			0Ch CJMP DL
+			0Dh CJMP CF
+			0Eh CJMP ZF
+			0Fh CJMP SF
+			10h CJMP SP
+			11h CJMP SS
+			12h CJMP IP
+			13h CJMP CS
+			14h CJMP SI
+			15h CJMP DI
+			16h CJMP DS
+			17h CJMP ES
+	6.2)JZ  (39h-3Ah)
+		Description: Jumps to Indicated Address Value if flag ZF = 1.
+					 One byte word.
+		##  Command		
+		39h JMP {ADDRESS}
+
+		CJZ
+		Description: Jumps to Indicated Relative Instruction Value if ZF = 1.
+					 Jump forward or backwards is done by reading flag DF.
+					 Two bytes word. First byte is always 3Ah.
+		3Ah CJZ 
+			##  Command		
+			00h CJZ (Number)
+			01h CJZ AX
+			02h CJZ BX
+			03h CJZ CX
+			04h CJZ DX
+			05h CJZ AH
+			06h CJZ AL
+			07h CJZ BH
+			08h CJZ BL
+			09h CJZ CH
+			0Ah CJZ CL
+			0Bh CJZ DH
+			0Ch CJZ DL
+			0Dh CJZ CF
+			0Eh CJZ ZF
+			0Fh CJZ SF
+			10h CJZ SP
+			11h CJZ SS
+			12h CJZ IP
+			13h CJZ CS
+			14h CJZ SI
+			15h CJZ DI
+			16h CJZ DS
+			17h CJZ ES
+	6.3)JNZ (3Bh-3Ch)
+		Description: Jumps to Indicated Address Value if flag ZF = 0.
+					 One byte word.
+		##  Command		
+		3Bh JMP {ADDRESS}
+
+		CJZ
+		Description: Jumps to Indicated Relative Instruction Value if ZF = 0.
+					 Jump forward or backwards is done by reading flag DF.
+					 Two bytes word. First byte is always 3Ch.
+		3Ch CJZ 
+			##  Command		
+			00h CJZ (Number)
+			01h CJZ AX
+			02h CJZ BX
+			03h CJZ CX
+			04h CJZ DX
+			05h CJZ AH
+			06h CJZ AL
+			07h CJZ BH
+			08h CJZ BL
+			09h CJZ CH
+			0Ah CJZ CL
+			0Bh CJZ DH
+			0Ch CJZ DL
+			0Dh CJZ CF
+			0Eh CJZ ZF
+			0Fh CJZ SF
+			10h CJZ SP
+			11h CJZ SS
+			12h CJZ IP
+			13h CJZ CS
+			14h CJZ SI
+			15h CJZ DI
+			16h CJZ DS
+			17h CJZ ES
+	6.4)JE  (3Dh-3Eh)
+		Description: Jumps to Indicated Address Value if flag CF = 1
+					 One byte word.
+		##  Command		
+		3Dh JE {ADDRESS}
+
+		CJE
+		Description: Jumps to Indicated Relative Instruction Value if CF = 1.
+					 Jump forward or backwards is done by reading flag DF.
+					 Two bytes word. First byte is always 3Eh.
+		3Eh CJE 
+			##  Command		
+			00h CJE (Number)
+			01h CJE AX
+			02h CJE BX
+			03h CJE CX
+			04h CJE DX
+			05h CJE AH
+			06h CJE AL
+			07h CJE BH
+			08h CJE BL
+			09h CJE CH
+			0Ah CJE CL
+			0Bh CJE DH
+			0Ch CJE DL
+			0Dh CJE CF
+			0Eh CJE ZF
+			0Fh CJE SF
+			10h CJE SP
+			11h CJE SS
+			12h CJE IP
+			13h CJE CS
+			14h CJE SI
+			15h CJE DI
+			16h CJE DS
+			17h CJE ES
+	6.5)JNE (3Fh-40h)
+		Description: Jumps to Indicated Address Value if flag CF = 0
+					 One byte word.
+		##  Command		
+		3Fh JNE {ADDRESS}
+
+		CJNE
+		Description: Jumps to Indicated Relative Instruction Value if CF = 0.
+					 Jump forward or backwards is done by reading flag DF.
+					 Two bytes word. First byte is always 40h.
+		40h CJNE 
+			##  Command		
+			00h CJNE (Number)
+			01h CJNE AX
+			02h CJNE BX
+			03h CJNE CX
+			04h CJNE DX
+			05h CJNE AH
+			06h CJNE AL
+			07h CJNE BH
+			08h CJNE BL
+			09h CJNE CH
+			0Ah CJNE CL
+			0Bh CJNE DH
+			0Ch CJNE DL
+			0Dh CJNE CF
+			0Eh CJNE ZF
+			0Fh CJNE SF
+			10h CJNE SP
+			11h CJNE SS
+			12h CJNE IP
+			13h CJNE CS
+			14h CJNE SI
+			15h CJNE DI
+			16h CJNE DS
+			17h CJNE ES
+	6.6)JG  (41h-42h)
+		Description: Jumps to Indicated Address Value if flag SF = 1.
+					 One byte word.
+		##  Command		
+		41h JG {ADDRESS}
+
+		CJG
+		Description: Jumps to Indicated Relative Instruction Value if SF = 1.
+					 Jump forward or backwards is done by reading flag DF.
+					 Two bytes word. First byte is always 42h.
+		42h CJG 
+			##  Command		
+			00h CJG (Number)
+			01h CJG AX
+			02h CJG BX
+			03h CJG CX
+			04h CJG DX
+			05h CJG AH
+			06h CJG AL
+			07h CJG BH
+			08h CJG BL
+			09h CJG CH
+			0Ah CJG CL
+			0Bh CJG DH
+			0Ch CJG DL
+			0Dh CJG CF
+			0Eh CJG ZF
+			0Fh CJG SF
+			10h CJG SP
+			11h CJG SS
+			12h CJG IP
+			13h CJG CS
+			14h CJG SI
+			15h CJG DI
+			16h CJG DS
+			17h CJG ES
+	6.7)JGE (43h-44h)
+		Description: Jumps to Indicated Address Value if flag CF = 1 or if SF = 1.
+					 One byte word.
+		##  Command		
+		43h JGE {ADDRESS}
+
+		CJGE
+		Description: Jumps to Indicated Relative Instruction Value if flag CF = 1 or if SF = 1.
+					 Jump forward or backwards is done by reading flag DF.
+					 Two bytes word. First byte is always 44h.
+		44h CJGE 
+			##  Command		
+			00h CJGE (Number)
+			01h CJGE AX
+			02h CJGE BX
+			03h CJGE CX
+			04h CJGE DX
+			05h CJGE AH
+			06h CJGE AL
+			07h CJGE BH
+			08h CJGE BL
+			09h CJGE CH
+			0Ah CJGE CL
+			0Bh CJGE DH
+			0Ch CJGE DL
+			0Dh CJGE CF
+			0Eh CJGE ZF
+			0Fh CJGE SF
+			10h CJGE SP
+			11h CJGE SS
+			12h CJGE IP
+			13h CJGE CS
+			14h CJGE SI
+			15h CJGE DI
+			16h CJGE DS
+			17h CJGE ES
+	6.8)JL  (45h-46h)
+		Description: Jumps to Indicated Address Value if flag SF = 0.
+					 One byte word.
+		##  Command		
+		45h JL {ADDRESS}
+
+		CJL
+		Description: Jumps to Indicated Relative Instruction Value if SF = 0.
+					 Jump forward or backwards is done by reading flag DF.
+					 Two bytes word. First byte is always 46h.
+		46h CJL 
+			##  Command		
+			00h CJL (Number)
+			01h CJL AX
+			02h CJL BX
+			03h CJL CX
+			04h CJL DX
+			05h CJL AH
+			06h CJL AL
+			07h CJL BH
+			08h CJL BL
+			09h CJL CH
+			0Ah CJL CL
+			0Bh CJL DH
+			0Ch CJL DL
+			0Dh CJL CF
+			0Eh CJL ZF
+			0Fh CJL SF
+			10h CJL SP
+			11h CJL SS
+			12h CJL IP
+			13h CJL CS
+			14h CJL SI
+			15h CJL DI
+			16h CJL DS
+			17h CJL ES
+	6.9)JLE (47h-48h)
+		Description: Jumps to Indicated Address Value if flag SF = 0 or if flag CF = 1.
+					 One byte word.
+		##  Command		
+		47h JLE {ADDRESS}
+
+		CJLE
+		Description: Jumps to Indicated Relative Instruction Value if flag SF = 0 or if flag CF = 1.
+					 Jump forward or backwards is done by reading flag DF.
+					 Two bytes word. First byte is always 48h.
+		48h CJLE 
+			##  Command		
+			00h CJLE (Number)
+			01h CJLE AX
+			02h CJLE BX
+			03h CJLE CX
+			04h CJLE DX
+			05h CJLE AH
+			06h CJLE AL
+			07h CJLE BH
+			08h CJLE BL
+			09h CJLE CH
+			0Ah CJLE CL
+			0Bh CJLE DH
+			0Ch CJLE DL
+			0Dh CJLE CF
+			0Eh CJLE ZF
+			0Fh CJLE SF
+			10h CJLE SP
+			11h CJLE SS
+			12h CJLE IP
+			13h CJLE CS
+			14h CJLE SI
+			15h CJLE DI
+			16h CJLE DS
+			17h CJLE ES
+7)  CALL (49h-4Ah)
+	CALLs are similar to JMPs, but they have a return code.
+	When you CALL [ADDRESS], it saves the actual IP on SI and the [ADDRESS] on DI.
+	After executing the code, you can call RET to return to SI+(1).
+	##  Command
+	49h CALL {ADDRESS}
+	4Ah RET
+8)  END (4Bh)
+	Stops the execution of the program.
+	##  Command
+	4Bh END
+9)  NOP (4C)
+	Skips 1 Clock cycle.
+	##  Command
+	4Dh NOP
+10) INT (4Dh)
+	Interruption Calls. Runs special code already programmed on the machine.
+	Usually parameters are passed to those functions on the stack.
+	##  Command
+	49h INT (Number)
+
+	9.01) PRINTS
+	9.02) PRINT
+	9.03) PRINT_POS
+	9.04) INPUT
+	9.05) TEXT
+	9.06) RECT
+	9.07) LINE
+	9.08) LINES
+	9.09) DISPLAYGRAPHICS
+	9.10) CLEARTEXT
+	9.11) READ_KEYBOARD_STATE
+	9.12) SETCOLOR
+	9.13) SIN
+	9.14) COS
+	9.15) MOD
+	9.16) CHAR_TO_INT
+	9.17) INT_TO_CHAR
+	9.18) CONVERT_FLOAT_TO_INT	
+	9.19) ROUND
+	9.20) RANDOM
+	9.21) CONNECT
+	9.22) GET_CONNECTIONS
+	9.23) DISCONNECT_ALL
+	9.24) READ_MEMORY
+	9.25) SAVE_MEMORY
+	9.26) ERASE_MEMORY
+	9.27) HAS_MEMORY
+	9.28) GET_MEMORIES	
+	9.29) CLEAR_MEMORIES
+	9.30) HAS_FLOPPY
+	9.31) BOOT_FROM_FLOPPY
+	9.32) SAVE_DATA_TO_FLOPPY
+	9.33) LOAD_DATA_TO_FLOPPY
+	9.34) FIND_PATH
+	9.35) GET_USER
+	9.36) GET_HOUR
+	9.37) GET_MINUTE
+	9.38) GET_TIME
+	9.39) GET_COMPUTER_NAME
+	9.40) SCREEN_HEIGHT
+	9.41) SCREEN_WIDTH
+	9.42) LOCK_DOOR
+	9.43) UNLOCK_DOOR
+	9.44) PLAY_SOUND
+	9.45) SOUND_PITCH
+	9.46) QUIT
+	9.47) SLEEP
+	9.48) SLURP
+	9.49) GET_RAIN
+	9.50) SET_RAIN
+	9.51) REMOTE_FUNCTION_CALL
+	9.52) GET_PEOPLE
+	9.53) GET_THINGS_OF_TYPE
+	9.54) GET_POSITION
+	9.55) SET_POSITION
+	9.56) GET_ROOM
+	9.57) GET_THINGS_IN_ROOM
+	9.58) GET_ALL_ROOMS
+	9.59) GET_TYPE_OF_THING
+	9.60) INTERACT_WITH
+	9.61) COPY_TO_CLIPBOARD
+	9.62) APPEND_CODE
+
+
+
