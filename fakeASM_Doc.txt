@@ -5,6 +5,8 @@
 =Feel free to modify and use this however you want.                        =
 =This is a description manual for FakeASM, a binary interpreter for SPRAK  =
 =It was based on the 8086 instruction set, but simplified.                 =
+=THIS IS NOT FOR SMALL_FAKEASM! THIS IS THE SET FOR THE COMPLETE FAKEASM   =
+=... which i'll complete someday.                                          =
 ============================================================================
 
 Notation for reading this document:
