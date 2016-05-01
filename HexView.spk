@@ -1,0 +1,535 @@
+
+String maincode = ""
+number code_len = 0
+string screenbuffer = ""
+number i = 0
+array arrcode = []
+ClearText()
+LoadFile()
+code_len = Count(maincode)
+string strtmp = ""
+#PrintS("123456789*123456789*123456789*123456789*123456789*123456789*123456789*123456789*123456789*123456789*123456789*123456789*123456789*")
+#Sleep(10)
+Print("Loading file...")
+loop x from 0 to code_len - 1
+    Append(arrcode, IntToHex(CharToInt(maincode[x])))
+    strtmp = strtmp + arrcode[x] + " "
+    if i == 10
+        i=-1    
+        strtmp = strtmp + "  " + Mid(maincode,x - 10,10)
+        strtmp = SpaceFill(strtmp, 61) #62 is number of cols
+        screenbuffer = screenbuffer + strtmp
+        strtmp = ""
+    end#if
+    i++
+end#loop
+
+Print(screenbuffer)
+
+#-------------------------------------
+String Mid(string text, number start, number length)
+    #Returns a piece of a string
+    string endres = ""
+    loop i from start to start+length
+endres = endres + text[i]
+end#loop
+    return endres
+end#string
+
+
+
+String SpaceFill(string str, number maxfill)
+    #Fills a string with spaces until it reaches maxfill
+    string tmp
+    loop x from Count(str) to maxfill
+        tmp = tmp + " "
+    end#loop
+    Return (str + tmp)
+end#string
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void LoadFile()
+if HasMemory("data") == True
+    maincode = LoadMemory("data")
+    return
+end#if
+################ASM CODE############################
+
+                 # BEGIN:
+AddCode("90")    # ADD  CX, 1     
+AddCode("01")    # 
+AddCode("1A")    # MOV  AX, CX
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 7
+AddCode("07")    #
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 'a'
+AddCode("00")    #
+AddCode("EE")    # CALL PRINT
+AddCode("01")    # 
+AddCode("80")    # CMP  CX, 20
+AddCode("08")    #
+AddCode("A8")    # JGE  QUIT
+AddCode("00")    #
+AddCode("13")    #
+AddCode("A0")    # JMP  BEGIN
+AddCode("00")    #
+AddCode("00")    #
+                 # QUIT:
+AddCode("FF")    # END
+AddCode("90")    # ADD  CX, 1     
+AddCode("01")    # 
+AddCode("1A")    # MOV  AX, CX
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 7
+AddCode("07")    #
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 'a'
+AddCode("00")    #
+AddCode("EE")    # CALL PRINT
+AddCode("01")    # 
+AddCode("80")    # CMP  CX, 20
+AddCode("08")    #
+AddCode("A8")    # JGE  QUIT
+AddCode("00")    #
+AddCode("13")    #
+AddCode("A0")    # JMP  BEGIN
+AddCode("00")    #
+AddCode("00")    #
+                 # QUIT:
+AddCode("FF")    # END
+AddCode("FF")    # END
+AddCode("90")    # ADD  CX, 1     
+AddCode("01")    # 
+AddCode("1A")    # MOV  AX, CX
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 7
+AddCode("07")    #
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 'a'
+AddCode("00")    #
+AddCode("EE")    # CALL PRINT
+AddCode("01")    # 
+AddCode("80")    # CMP  CX, 20
+AddCode("08")    #
+AddCode("A8")    # JGE  QUIT
+AddCode("00")    #
+AddCode("13")    #
+AddCode("A0")    # JMP  BEGIN
+AddCode("00")    #
+AddCode("00")    #
+                 # QUIT:
+AddCode("FF")    # END
+AddCode("FF")    # END
+AddCode("90")    # ADD  CX, 1     
+AddCode("01")    # 
+AddCode("1A")    # MOV  AX, CX
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 7
+AddCode("07")    #
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 'a'
+AddCode("00")    #
+AddCode("EE")    # CALL PRINT
+AddCode("01")    # 
+AddCode("80")    # CMP  CX, 20
+AddCode("08")    #
+AddCode("A8")    # JGE  QUIT
+AddCode("00")    #
+AddCode("13")    #
+AddCode("A0")    # JMP  BEGIN
+AddCode("00")    #
+AddCode("00")    #
+                 # QUIT:
+AddCode("FF")    # END
+AddCode("FF")    # END
+AddCode("90")    # ADD  CX, 1     
+AddCode("01")    # 
+AddCode("1A")    # MOV  AX, CX
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 7
+AddCode("07")    #
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 'a'
+AddCode("00")    #
+AddCode("EE")    # CALL PRINT
+AddCode("01")    # 
+AddCode("80")    # CMP  CX, 20
+AddCode("08")    #
+AddCode("A8")    # JGE  QUIT
+AddCode("00")    #
+AddCode("13")    #
+AddCode("A0")    # JMP  BEGIN
+AddCode("00")    #
+AddCode("00")    #
+                 # QUIT:
+AddCode("FF")    # END
+AddCode("FF")    # END
+AddCode("90")    # ADD  CX, 1     
+AddCode("01")    # 
+AddCode("1A")    # MOV  AX, CX
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 7
+AddCode("07")    #
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 'a'
+AddCode("00")    #
+AddCode("EE")    # CALL PRINT
+AddCode("01")    # 
+AddCode("80")    # CMP  CX, 20
+AddCode("08")    #
+AddCode("A8")    # JGE  QUIT
+AddCode("00")    #
+AddCode("13")    #
+AddCode("A0")    # JMP  BEGIN
+AddCode("00")    #
+AddCode("00")    #
+                 # QUIT:
+AddCode("FF")    # END
+AddCode("FF")    # END
+AddCode("90")    # ADD  CX, 1     
+AddCode("01")    # 
+AddCode("1A")    # MOV  AX, CX
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 7
+AddCode("07")    #
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 'a'
+AddCode("00")    #
+AddCode("EE")    # CALL PRINT
+AddCode("01")    # 
+AddCode("80")    # CMP  CX, 20
+AddCode("08")    #
+AddCode("A8")    # JGE  QUIT
+AddCode("00")    #
+AddCode("13")    #
+AddCode("A0")    # JMP  BEGIN
+AddCode("00")    #
+AddCode("00")    #
+                 # QUIT:
+AddCode("FF")    # END
+AddCode("FF")    # END
+AddCode("90")    # ADD  CX, 1     
+AddCode("01")    # 
+AddCode("1A")    # MOV  AX, CX
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 7
+AddCode("07")    #
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 'a'
+AddCode("00")    #
+AddCode("EE")    # CALL PRINT
+AddCode("01")    # 
+AddCode("80")    # CMP  CX, 20
+AddCode("08")    #
+AddCode("A8")    # JGE  QUIT
+AddCode("00")    #
+AddCode("13")    #
+AddCode("A0")    # JMP  BEGIN
+AddCode("00")    #
+AddCode("00")    #
+                 # QUIT:
+AddCode("FF")    # END
+AddCode("FF")    # END
+AddCode("90")    # ADD  CX, 1     
+AddCode("01")    # 
+AddCode("1A")    # MOV  AX, CX
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 7
+AddCode("07")    #
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 'a'
+AddCode("00")    #
+AddCode("EE")    # CALL PRINT
+AddCode("01")    # 
+AddCode("80")    # CMP  CX, 20
+AddCode("08")    #
+AddCode("A8")    # JGE  QUIT
+AddCode("00")    #
+AddCode("13")    #
+AddCode("A0")    # JMP  BEGIN
+AddCode("00")    #
+AddCode("00")    #
+                 # QUIT:
+AddCode("FF")    # END
+AddCode("FF")    # END
+AddCode("90")    # ADD  CX, 1     
+AddCode("01")    # 
+AddCode("1A")    # MOV  AX, CX
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 7
+AddCode("07")    #
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 'a'
+AddCode("00")    #
+AddCode("EE")    # CALL PRINT
+AddCode("01")    # 
+AddCode("80")    # CMP  CX, 20
+AddCode("08")    #
+AddCode("A8")    # JGE  QUIT
+AddCode("00")    #
+AddCode("13")    #
+AddCode("A0")    # JMP  BEGIN
+AddCode("00")    #
+AddCode("00")    #
+                 # QUIT:
+AddCode("FF")    # END
+AddCode("FF")    # END
+AddCode("90")    # ADD  CX, 1     
+AddCode("01")    # 
+AddCode("1A")    # MOV  AX, CX
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 7
+AddCode("07")    #
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 'a'
+AddCode("00")    #
+AddCode("EE")    # CALL PRINT
+AddCode("01")    # 
+AddCode("80")    # CMP  CX, 20
+AddCode("08")    #
+AddCode("A8")    # JGE  QUIT
+AddCode("00")    #
+AddCode("13")    #
+AddCode("A0")    # JMP  BEGIN
+AddCode("00")    #
+AddCode("00")    #
+                 # QUIT:
+AddCode("FF")    # END
+AddCode("FF")    # END
+AddCode("90")    # ADD  CX, 1     
+AddCode("01")    # 
+AddCode("1A")    # MOV  AX, CX
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 7
+AddCode("07")    #
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 'a'
+AddCode("00")    #
+AddCode("EE")    # CALL PRINT
+AddCode("01")    # 
+AddCode("80")    # CMP  CX, 20
+AddCode("08")    #
+AddCode("A8")    # JGE  QUIT
+AddCode("00")    #
+AddCode("13")    #
+AddCode("A0")    # JMP  BEGIN
+AddCode("00")    #
+AddCode("00")    #
+                 # QUIT:
+AddCode("FF")    # END
+AddCode("FF")    # END
+AddCode("90")    # ADD  CX, 1     
+AddCode("01")    # 
+AddCode("1A")    # MOV  AX, CX
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 7
+AddCode("07")    #
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 'a'
+AddCode("00")    #
+AddCode("EE")    # CALL PRINT
+AddCode("01")    # 
+AddCode("80")    # CMP  CX, 20
+AddCode("08")    #
+AddCode("A8")    # JGE  QUIT
+AddCode("00")    #
+AddCode("13")    #
+AddCode("A0")    # JMP  BEGIN
+AddCode("00")    #
+AddCode("00")    #
+                 # QUIT:
+AddCode("FF")    # END
+AddCode("FF")    # END
+AddCode("90")    # ADD  CX, 1     
+AddCode("01")    # 
+AddCode("1A")    # MOV  AX, CX
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 7
+AddCode("07")    #
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 'a'
+AddCode("00")    #
+AddCode("EE")    # CALL PRINT
+AddCode("01")    # 
+AddCode("80")    # CMP  CX, 20
+AddCode("08")    #
+AddCode("A8")    # JGE  QUIT
+AddCode("00")    #
+AddCode("13")    #
+AddCode("A0")    # JMP  BEGIN
+AddCode("00")    #
+AddCode("00")    #
+                 # QUIT:
+AddCode("FF")    # END
+AddCode("FF")    # END
+AddCode("90")    # ADD  CX, 1     
+AddCode("01")    # 
+AddCode("1A")    # MOV  AX, CX
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 7
+AddCode("07")    #
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 'a'
+AddCode("00")    #
+AddCode("EE")    # CALL PRINT
+AddCode("01")    # 
+AddCode("80")    # CMP  CX, 20
+AddCode("08")    #
+AddCode("A8")    # JGE  QUIT
+AddCode("00")    #
+AddCode("13")    #
+AddCode("A0")    # JMP  BEGIN
+AddCode("00")    #
+AddCode("00")    #
+                 # QUIT:
+AddCode("FF")    # END
+AddCode("FF")    # END
+AddCode("90")    # ADD  CX, 1     
+AddCode("01")    # 
+AddCode("1A")    # MOV  AX, CX
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 7
+AddCode("07")    #
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 'a'
+AddCode("00")    #
+AddCode("EE")    # CALL PRINT
+AddCode("01")    # 
+AddCode("80")    # CMP  CX, 20
+AddCode("08")    #
+AddCode("A8")    # JGE  QUIT
+AddCode("00")    #
+AddCode("13")    #
+AddCode("A0")    # JMP  BEGIN
+AddCode("00")    #
+AddCode("00")    #
+                 # QUIT:
+AddCode("FF")    # END
+AddCode("FF")    # END
+AddCode("90")    # ADD  CX, 1     
+AddCode("01")    # 
+AddCode("1A")    # MOV  AX, CX
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 7
+AddCode("07")    #
+AddCode("01")    # PUSH AX
+AddCode("24")    # MOV  AX, 'a'
+AddCode("00")    #
+AddCode("EE")    # CALL PRINT
+AddCode("01")    # 
+AddCode("80")    # CMP  CX, 20
+AddCode("08")    #
+AddCode("A8")    # JGE  QUIT
+AddCode("00")    #
+AddCode("13")    #
+AddCode("A0")    # JMP  BEGIN
+AddCode("00")    #
+AddCode("00")    #
+                 # QUIT:
+AddCode("FF")    # END
+SaveMemory("data",maincode)
+###################################################
+end#void
+void AddCode(string hex)
+maincode = maincode + IntToChar(HexToInt(hex))
+end#void
+    
+string IntToHex(number int)
+    # Converts an integer number to a hex string
+    array num = []
+    array Letters = ["A","B","C","D","E","F"]
+    string ret = ""
+    Append(num,Int(int / 16))
+    Append(num, Mod(int, 16))
+    number x
+    loop y from 0 to Count(num) - 1
+        x = num[y]
+        if x >= 10    
+            if x > 15
+                ret = ret + IntToHex(x)
+            else    
+                ret = ret + Letters[x - 10]
+        end#if
+    else    
+        ret = ret + x
+    end#if
+    end#loop
+    Return ret
+end#string
+    
+number HexToInt(string hex)
+    # Converts a hex string to a integer number
+    array Letters = ["A","B","C","D","E","F"]
+    number hex_count = Count(hex) 
+    array hex_ints = []
+    number ret = 0
+    string tmp = 0
+    loop x from 0 to hex_count - 1
+        tmp = hex[x]
+        loop y from 0 to Count(Letters) - 1
+            if hex[x] == Letters[y]
+                tmp = 10 + y
+            end#if
+        end#loop
+        Append(hex_ints, tmp)
+    end#loop
+    number hex_count2
+    hex_count2 = hex_count - 1
+    loop x from 0 to hex_count2
+        ret = ret + Power16(hex_ints[x], hex_count2 - x)        
+    end#loop
+    Return ret
+end#number
+
+number Power16(number n, number p)
+    # Auxiliary Function for HexToInt
+    # Calculates the p power of 16 and multiplies for n
+    number ret = n
+    if p == 0
+        Return n
+    end#if
+    loop x from 1 to p 
+        ret = ret * 16
+    end#loop
+    Return ret
+end#number
+    
+string Subst(string str, string str2, number pos)
+    #Inserts a string str2 into str on the position pos
+    string tmp = ""
+    loop x from 0 to Count(str) - 1
+        if x != pos
+            tmp = tmp + str[x]
+        else    
+            tmp = tmp + str2
+        end#if       
+    end#loop
+    Return tmp
+end#string
+    
+array arrRemove(array arrwork, number item)
+    #Safely removes item from array
+    #Returns array with removed item
+    array arrtemp = []
+    loop x from 0 to Count(arrwork) - 1
+        if x != item
+            Append(arrtemp,arrwork[x])
+        end#if
+    end#loop
+    Return arrtemp
+end#void    
