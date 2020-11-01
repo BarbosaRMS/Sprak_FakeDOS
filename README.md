@@ -1,6 +1,19 @@
 # Sprak_FakeDOS
 FakeDOS operating system for Else Heart.Break() computer terminals
 
+# Files:
+  * Binary.spk : Implementation of a ASM interpreter for the FakeDOS OS. Still on very early alpha.
+  * Editor.spk : File editor for the machine. You can grab this if you don't want the OS, just the editor.
+  * FakeDOS+Editor.spk: The OS with the Editor. This is the working version of the OS. You should grab this.
+  * FakeOS_With_Editor+smallFakeASM.spk : The full version. Not working at the moment (needs jsut some tweaks to make it run). Includes the ASM thing.
+  * HexView.spk : A hex viewer for the ASM files.
+  * FakeASM_doc.txt : Description of the FakeASM language, in txt format
+  * smallFakeASM_doc.pdf : Description of the FakeASM language, in pdf format
+  
+ TLDR: Just get the FakeDOS+Editor.spk file.
+  
+
+
 # How to use:
 Pick a computer in the game that has a big screen (best for the editor. I recommend the one in the basement of the Hotel.)
 Hack a screwdriver, and change the code to 
